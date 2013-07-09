@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd
+			http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+
+	<beans:alias alias="messageDataSource" name="derbyDataSource"/>
+
+	<bean id="derbyDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+		<property name="driverClassName" value="org.apache.derby.jdbc.EmbeddedDriver" />
+		<property name="url" value="jdbc:derby:/Users/paul/project/si-exp/data/derby/sitest" />
+	</bean>
+
+	<jdbc:initialize-database data-source="derbyDataSource" enabled="false">
+		<jdbc:script location="classpath:org/springframework/integration/jdbc/schema-derby.sql"/>
+	</jdbc:initialize-database>
+
+	<bean id="hsqldbDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+		<property name="driverClassName" value="org.hsqldb.jdbcDriver" />
+		<property name="url" value="jdbc:hsqldb:file:/Users/paul/project/si-exp/data/hsqldb/sitest" />
+		<property name="username" value="sa" />
+		<property name="password" value="" />
+	</bean>
+ 
+	<jdbc:initialize-database data-source="hsqldbDataSource" enabled="false">
+		<jdbc:script location="classpath:org/springframework/integration/jdbc/schema-hsqldb.sql"/>
+	</jdbc:initialize-database>
+</beans>

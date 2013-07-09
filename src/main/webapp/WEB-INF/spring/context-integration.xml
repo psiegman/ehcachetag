@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:int="http://www.springframework.org/schema/integration"
+	xmlns:int-jdbc="http://www.springframework.org/schema/integration/jdbc"
+	xmlns:int-ws="http://www.springframework.org/schema/integration/ws"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/integration/jdbc http://www.springframework.org/schema/integration/jdbc/spring-integration-jdbc.xsd
+			http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration.xsd
+			http://www.springframework.org/schema/integration/ws http://www.springframework.org/schema/integration/ws/spring-integration-ws.xsd
+			http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+	
+	<!-- Root Context: defines shared resources visible to all other web components -->
+	<context:component-scan base-package="nl.siegmann.sitest" />
+
+	<int:channel id="greetings"/>
+
+	<int:transformer input-channel="greetings"
+		output-channel="greetingWebserviceRequests"
+		ref="greetingRequestTransformer" />
+	<beans:bean id="greetingRequestTransformer" class="nl.siegmann.sitest.GreetingRequestTransformer"/>
+
+
+	<!-- 	<int-jdbc:message-store id="messageStore" data-source="messageDataSource"/>
+
+	<int:channel id="greetingRequests">
+		<int:queue message-store="messageStore"/>
+	</int:channel>
+ -->
+
+<!-- 	<int:service-activator input-channel="greetingRequests" output-channel="greetingWebserviceRequests">
+		<int:poller fixed-rate="1000" />
+	</int:service-activator>
+
+	
+	<beans:bean id="messageConsumerService" class="nl.siegmann.sitest.service.impl.MessageConsumerServiceImpl"/>
+ -->
+	<int:channel id="greetingWebserviceRequests"/>
+	<int:channel id="greetingWebserviceResponses"/>
+
+	<bean id="greetingMarshaller" class="org.springframework.oxm.jaxb.Jaxb2Marshaller">
+		<property name="classesToBeBound"><list><value>org.example.hello.GreetingRequest</value><value>org.example.hello.GreetingResponse</value></list></property>
+	</bean>
+
+	<int-ws:outbound-gateway id="greetingWebService" uri="http://localhost:9010/service/greeting"
+		request-channel="greetingWebserviceRequests" marshaller="greetingMarshaller"
+		reply-channel="greetingWebserviceResponses"
+	>
+	</int-ws:outbound-gateway>
+
+	<int:outbound-channel-adapter channel="greetingWebserviceResponses" ref="greetingResponseHandler" />
+
+	<beans:bean id="greetingResponseHandler" class="nl.siegmann.sitest.GreetingWebserviceResponseHandler"/>
+	
+	<bean id="transactionManager" class="org.springframework.transaction.jta.JtaTransactionManager" />
+	
+	<!-- Bridge between a PollableChannel and a SubscribableChannel -->
+<!-- 	<int:bridge id="delivery-bridge" input-channel="delivery-channel" output-channel="publish-channel">
+		<int:poller max-messages-per-poll="1" fixed-delay="30000">
+ -->			<!-- This is the application transaction manager -->
+<!-- 			<int:transactional transaction-manager="transactionManager" />
+		</int:poller>
+	</int:bridge>
+ -->	
+</beans>
