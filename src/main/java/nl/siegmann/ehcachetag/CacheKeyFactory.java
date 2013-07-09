@@ -8,4 +8,5 @@ import javax.servlet.jsp.PageContext;
 public interface CacheKeyFactory {
 	void init(Map<String, String> properties);
 	Serializable createCacheKey(Serializable tagCacheKey, PageContext pageContext);
+	void destroy();
 }

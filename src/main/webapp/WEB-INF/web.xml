@@ -10,12 +10,12 @@
 	</context-param>
 	
 	<context-param>
-		<param-name>ehcachetag.cacheKeyMetaFactory</param-name>
+		<param-name>ehcachetag.cacheKeyMetaFactoryClass</param-name>
 		<param-value>nl.siegmann.ehcachetag.DefaultCacheKeyMetaFactory</param-value>
 	</context-param>
 
 	<context-param>
-		<param-name>ehcachetag.cachekeyfactories</param-name>
+		<param-name>ehcachetag.cacheKeyMetaFactoryConfig</param-name>
 		<param-value>url=nl.siegmann.ehcachetag.UrlCacheKeyFactory</param-value>
 	</context-param>
 		

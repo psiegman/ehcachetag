@@ -19,4 +19,10 @@ public class UrlCacheKeyFactory implements CacheKeyFactory {
 		String requestUri = ((HttpServletRequest) pageContext.getRequest()).getRequestURI();
 		return EHCacheTagUtil.createCacheKey(tagCacheKey, requestUri);
 	}
+
+	@Override
+	public void destroy() {
+		// TODO Auto-generated method stub
+		
+	}
 }
