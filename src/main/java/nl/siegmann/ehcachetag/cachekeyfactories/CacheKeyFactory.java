@@ -1,4 +1,4 @@
-package nl.siegmann.ehcachetag;
+package nl.siegmann.ehcachetag.cachekeyfactories;
 
 import java.io.Serializable;
 import java.util.Map;

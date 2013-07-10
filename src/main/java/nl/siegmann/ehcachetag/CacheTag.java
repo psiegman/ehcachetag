@@ -9,6 +9,7 @@ import javax.servlet.jsp.tagext.BodyTagSupport;
 
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
+import nl.siegmann.ehcachetag.cachekeyfactories.CacheKeyFactory;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

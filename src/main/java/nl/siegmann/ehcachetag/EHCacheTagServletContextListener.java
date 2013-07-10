@@ -3,12 +3,14 @@ package nl.siegmann.ehcachetag;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
+import nl.siegmann.ehcachetag.cachekeyfactories.CacheKeyMetaFactory;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class InitEHCacheContextListener implements ServletContextListener {
+public class EHCacheTagServletContextListener implements ServletContextListener {
 
-	private static final Logger LOG = LoggerFactory.getLogger(InitEHCacheContextListener.class);
+	private static final Logger LOG = LoggerFactory.getLogger(EHCacheTagServletContextListener.class);
 	
 	@Override
 	public void contextInitialized(ServletContextEvent servletContextEvent) {

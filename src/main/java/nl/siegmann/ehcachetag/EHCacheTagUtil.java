@@ -1,18 +1,11 @@
 package nl.siegmann.ehcachetag;
 
-import java.io.Serializable;
-import java.util.AbstractMap;
-
 import javax.servlet.jsp.PageContext;
 
-public class EHCacheTagUtil {
+import nl.siegmann.ehcachetag.cachekeyfactories.CacheKeyFactory;
+import nl.siegmann.ehcachetag.cachekeyfactories.CacheKeyMetaFactory;
 
-	/**
-	 * Creates an object that contains both parts and will use both parts for hashCode and equals.
-	 */
-	public static Serializable createCacheKey(Serializable part1, Serializable part2) {
-		return new AbstractMap.SimpleEntry<Serializable, Serializable>(part1, part2);
-	}
+public class EHCacheTagUtil {
 
 	/**
 	 * Tries to get the cachekey metafactory from the servlet application context.
