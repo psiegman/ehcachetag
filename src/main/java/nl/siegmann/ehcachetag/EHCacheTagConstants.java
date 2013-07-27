@@ -16,4 +16,9 @@ public class EHCacheTagConstants {
 	 * The attribute name under which the CacheKeyMetaFactory is stored in the web application context.
 	 */
 	public static final String METAFACTORY_ATTRIBUTE_NAME = "ehcachetag.cacheKeyMetaFactory";
+
+	/**
+	 * The name of the default cache.
+	 */
+	public static final String DEFAULT_CACHE_NAME = "ehcachetagCache";
 }

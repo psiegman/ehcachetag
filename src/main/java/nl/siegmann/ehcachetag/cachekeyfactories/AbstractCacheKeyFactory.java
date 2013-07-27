@@ -1,9 +1,8 @@
 package nl.siegmann.ehcachetag.cachekeyfactories;
 
-import java.io.Serializable;
 import java.util.Map;
 
-import javax.servlet.jsp.PageContext;
+import javax.servlet.jsp.JspContext;
 
 public abstract class AbstractCacheKeyFactory implements CacheKeyFactory {
 
@@ -12,8 +11,8 @@ public abstract class AbstractCacheKeyFactory implements CacheKeyFactory {
 	}
 
 	@Override
-	public abstract Serializable createCacheKey(Serializable tagCacheKey,
-			PageContext pageContext);
+	public abstract Object createCacheKey(Object tagCacheKey,
+			JspContext jspContext);
 
 	@Override
 	public void destroy() {

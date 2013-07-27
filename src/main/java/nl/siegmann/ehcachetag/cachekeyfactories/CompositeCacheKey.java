@@ -8,16 +8,11 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 /**
  * An object that can be used as a cache key where all components are used for hashCode and equals calculation.
  */
-public class CompositeCacheKey implements java.io.Serializable {
+public class CompositeCacheKey {
 	
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 8907654331874070103L;
-
-	private Serializable[] keyComponents;
+	private Object[] keyComponents;
 	
-	public CompositeCacheKey(Serializable... keyComponents) {
+	public CompositeCacheKey(Object... keyComponents) {
 		this.keyComponents = keyComponents;
 	}
 

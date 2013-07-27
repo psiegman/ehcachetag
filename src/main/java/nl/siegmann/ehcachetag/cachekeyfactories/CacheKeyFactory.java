@@ -1,12 +1,11 @@
 package nl.siegmann.ehcachetag.cachekeyfactories;
 
-import java.io.Serializable;
 import java.util.Map;
 
-import javax.servlet.jsp.PageContext;
+import javax.servlet.jsp.JspContext;
 
 public interface CacheKeyFactory {
 	void init(Map<String, String> properties);
-	Serializable createCacheKey(Serializable tagCacheKey, PageContext pageContext);
+	Object createCacheKey(Object tagCacheKey, JspContext jspContext);
 	void destroy();
 }
