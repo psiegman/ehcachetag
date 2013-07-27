@@ -1,15 +1,16 @@
 package nl.siegmann.ehcachetag;
 
+import javax.servlet.ServletContext;
 import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.BodyTagSupport;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.springframework.mock.web.MockPageContext;
-import org.springframework.mock.web.MockServletContext;
 
 public class CacheTagTest {
 
@@ -22,16 +23,13 @@ public class CacheTagTest {
 	public void setUp() {
 		MockitoAnnotations.initMocks(this);
 		this.testSubject = new CacheTag();
-		// mock ServletContext
-		MockServletContext mockServletContext = new MockServletContext();
-		// mock PageContext
-		MockPageContext mockPageContext = new MockPageContext(
-				mockServletContext);
-		testSubject.setPageContext(mockPageContext);
+		PageContext pageContext = Mockito.mock(PageContext.class);
+		ServletContext servletContext = Mockito.mock(ServletContext.class);
+		testSubject.setPageContext(pageContext);
 	}
 
 	@Test
-	public void test1() {
+	public void testDoStartTag_null_cache_key() {
 		// given
 
 		// when
