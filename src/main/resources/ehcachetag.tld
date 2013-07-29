@@ -8,6 +8,7 @@
 	<description>Enables the caching of jsp fragments</description>
 	<tlib-version>1.0</tlib-version>
 	<listener>nl.siegmann.ehcachetag.EHCacheTagServletContextListener</listener>
+	<uri>http://www.siegmann.nl/ehcachetag/taglib</uri>
 	<tag>
 		<description>Caches the bodycontent</description>
 		<display-name>cache</display-name>
@@ -19,11 +20,11 @@
 			<type>java.io.Serializable</type>
 		</attribute>
 		<attribute>
-			<name>name</name>
+			<name>cache</name>
 			<type>java.lang.String</type>
 		</attribute>
 		<attribute>
-			<name>keyGenerator</name>
+			<name>keyFactory</name>
 			<type>java.lang.String</type>
 		</attribute>
 	</tag>
