@@ -1,0 +1,31 @@
+<taglib xmlns="http://java.sun.com/xml/ns/javaee"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
+	http:/java.sun.com/xml/ns/j2ee/web-jsptaglibrary_2_1.xsd"
+	version="2.1">
+
+	<short-name>ehcachetag</short-name>
+	<description>Enables the caching of jsp fragments</description>
+	<tlib-version>1.0</tlib-version>
+	<listener>nl.siegmann.ehcachetag.EHCacheTagServletContextListener</listener>
+	<uri>http://www.siegmann.nl/ehcachetag/taglib</uri>
+	<tag>
+		<description>Caches the bodycontent</description>
+		<display-name>cache</display-name>
+		<name>cache</name>
+		<tag-class>nl.siegmann.ehcachetag.CacheTag</tag-class>
+		<body-content>JSP</body-content>
+		<attribute>
+			<name>key</name>
+			<type>java.io.Serializable</type>
+		</attribute>
+		<attribute>
+			<name>cache</name>
+			<type>java.lang.String</type>
+		</attribute>
+		<attribute>
+			<name>keyFactory</name>
+			<type>java.lang.String</type>
+		</attribute>
+	</tag>
+</taglib>
