@@ -5,7 +5,7 @@
 	<groupId>nl.siegmann.ehcachetag</groupId>
 	<artifactId>ehcachetag</artifactId>
 	<name>ehcachetag</name>
-	<packaging>war</packaging>
+	<packaging>jar</packaging>
 	<version>1.0.0-SNAPSHOT</version>
 	<properties>
 		<java-version>1.6</java-version>
@@ -58,14 +58,7 @@
 			</exclusions>
 		</dependency>
 
-		<!-- @Inject -->
-<!-- 		<dependency>
-			<groupId>javax.inject</groupId>
-			<artifactId>javax.inject</artifactId>
-			<version>1</version>
-		</dependency>
-
- -->		<!-- Servlet -->
+ 		<!-- Servlet -->
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>servlet-api</artifactId>
