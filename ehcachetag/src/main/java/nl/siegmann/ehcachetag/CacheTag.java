@@ -169,4 +169,9 @@ public class CacheTag extends BodyTagSupport {
 	public void setKeyFactory(String keyFactoryName) {
 		this.keyFactoryName = keyFactoryName;
 	}
+
+	// test
+	void setCachedBodyContent(String cachedBodyContent) {
+		this.cachedBodyContent = cachedBodyContent;
+	}
 }
