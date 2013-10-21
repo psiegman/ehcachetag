@@ -24,8 +24,9 @@ public class CacheTag extends BodyTagSupport {
 	private Object key;
 	private String cacheName = EHCacheTagConstants.DEFAULT_CACHE_NAME;
 	private String keyFactoryName;
-	private String cachedBodyContent = null;
-	
+	private String cachedBodyContent = ContentCache.NO_CACHED_VALUE;
+	private ContentCache contentCache = new ContentCache();
+
 	/**
 	 * Tries to get the body content from the cache using the cacheKey.
 	 * 
@@ -33,13 +34,13 @@ public class CacheTag extends BodyTagSupport {
 	 * @return The cached content, null if none found.
 	 */
 	private String getCachedBodyContent(String cacheName, Object cacheKey) {
-		Object cachedObject = TagCacheManager.getCachedValue(cacheName, cacheKey);
-		if (cachedObject == null) {
-			return null;
+		Object cachedObject = contentCache.getContent(cacheName, cacheKey);
+		if (cachedObject == ContentCache.NO_CACHED_VALUE) {
+			return ContentCache.NO_CACHED_VALUE;
 		}
 		if(! (cachedObject instanceof String)) {
 			LOG.error("Cached object with key '" + cacheKey + "' in cache '" + cacheName + "' is of unexpected type " + cachedObject.getClass().getName());
-			return null;
+			return ContentCache.NO_CACHED_VALUE;
 		}
 		return (String) cachedObject;
 	}
@@ -72,15 +73,7 @@ public class CacheTag extends BodyTagSupport {
 		return cacheKey;
 	}
 	
-	/**
-	 * Updates the cached version of the body content with the given content.
-	 * 
-	 * @param bodyContent
-	 */
-	private void updateCache(Object cacheKey, String bodyContent) {
-		TagCacheManager.updateCache(cacheName, cacheKey, bodyContent);
-	}
-	
+
 	/**
 	 * Writes the content of the body to the pageContext writer.
 	 * The content may come from the cache.
@@ -97,11 +90,14 @@ public class CacheTag extends BodyTagSupport {
 			return BodyTagSupport.EVAL_BODY_INCLUDE;
 		}
 		
-		int result = BodyTagSupport.EVAL_BODY_BUFFERED;
-
 		cachedBodyContent = getCachedBodyContent(cacheName, cacheKey);
 
-		if (cachedBodyContent != null) {
+		int result;
+
+		if (cachedBodyContent == ContentCache.NO_CACHED_VALUE) {
+			// we have no cached content
+			result = BodyTagSupport.EVAL_BODY_BUFFERED;
+		} else {
 			// we have cached content, don't execute the body
 			result = BodyTagSupport.SKIP_BODY;
 		}
@@ -110,24 +106,24 @@ public class CacheTag extends BodyTagSupport {
 
 	@Override
 	public int doEndTag() throws JspException {
-		if (cachedBodyContent == null) {
+		if (cachedBodyContent == ContentCache.NO_CACHED_VALUE) {
 			// no cached bodycontent available
 			// store new generated bodycontent in cache
 			cachedBodyContent = updateCache(bodyContent);
 		}
 		
-		if (cachedBodyContent != null) {
-			// write cached bodycontent to output
-			try {
-				pageContext.getOut().write(cachedBodyContent);
-			} catch (IOException e) {
-				throw new JspException(e);
-			}
-		} else {
+		if (cachedBodyContent == ContentCache.NO_CACHED_VALUE) {
 			// write regular bodycontent to output
 			// XXX doStartTag can return BodyTagSupport.EVAL_BODY_INCLUDE, do we have a bodyContent then?
 			try {
 				bodyContent.writeOut(pageContext.getOut());
+			} catch (IOException e) {
+				throw new JspException(e);
+			}
+		} else {
+			// write cached bodycontent to output
+			try {
+				pageContext.getOut().write(cachedBodyContent);
 			} catch (IOException e) {
 				throw new JspException(e);
 			}
@@ -138,13 +134,18 @@ public class CacheTag extends BodyTagSupport {
 	private String updateCache(BodyContent bodyContent) {
 		Object cacheKey = getCacheKey();
 		if (cacheKey == null) {
-			return null;
+			return ContentCache.NO_CACHED_VALUE;
 		}
 		String bodyContentAsString = bodyContent.getString();
-		updateCache(cacheKey, bodyContentAsString);
+		contentCache.putContent(cacheName, cacheKey, bodyContentAsString);
 		return bodyContentAsString;
 	}
 
+	// test
+	void setContentCache(ContentCache contentCache) {
+		this.contentCache = contentCache;
+	}
+	
 	public Object getKey() {
 		return key;
 	}
