@@ -2,7 +2,6 @@ package nl.siegmann.ehcachetag;
 
 import java.io.IOException;
 
-import javax.servlet.ServletContext;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspWriter;
 import javax.servlet.jsp.PageContext;
@@ -23,9 +22,6 @@ public class CacheTagTest {
 
 	@Mock
 	private PageContext pageContext;
-	
-	@Mock
-	private ServletContext servletContext;
 	
 	@Mock
 	private BodyContent bodyContent;
@@ -60,6 +56,8 @@ public class CacheTagTest {
 
 		// then
 		Assert.assertEquals(BodyTagSupport.EVAL_BODY_INCLUDE, actualResult);
+		Mockito.verify(pageContext).getAttribute(EHCacheTagConstants.METAFACTORY_ATTRIBUTE_NAME, PageContext.APPLICATION_SCOPE);
+		Mockito.verifyNoMoreInteractions(contentCache, jspWriter, pageContext, bodyContent);
 	}
 
 
@@ -76,7 +74,8 @@ public class CacheTagTest {
 		// then
 		Assert.assertEquals(BodyTagSupport.SKIP_BODY, startTagReturn);
 		Mockito.verify(contentCache).getContent("ehcachetag", "greeting");
-		Mockito.verifyNoMoreInteractions(contentCache);
+		Mockito.verify(pageContext).getAttribute(EHCacheTagConstants.METAFACTORY_ATTRIBUTE_NAME, PageContext.APPLICATION_SCOPE);
+		Mockito.verifyNoMoreInteractions(contentCache, jspWriter, pageContext, bodyContent);
 	}
 
 	@Test
@@ -92,7 +91,8 @@ public class CacheTagTest {
 		// then
 		Assert.assertEquals(BodyTagSupport.EVAL_BODY_BUFFERED, startTagReturn);
 		Mockito.verify(contentCache).getContent("XXX", "greeting");
-		Mockito.verifyNoMoreInteractions(contentCache);
+		Mockito.verify(pageContext).getAttribute(EHCacheTagConstants.METAFACTORY_ATTRIBUTE_NAME, PageContext.APPLICATION_SCOPE);
+		Mockito.verifyNoMoreInteractions(contentCache, jspWriter, pageContext, bodyContent);
 	}
 	
 	@Test

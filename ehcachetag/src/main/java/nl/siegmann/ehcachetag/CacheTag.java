@@ -39,7 +39,7 @@ public class CacheTag extends BodyTagSupport {
 			return ContentCache.NO_CACHED_VALUE;
 		}
 		if(! (cachedObject instanceof String)) {
-			LOG.error("Cached object with key '" + cacheKey + "' in cache '" + cacheName + "' is of unexpected type " + cachedObject.getClass().getName());
+			LOG.error("Cached object with key '" + cacheKey + "' in cache '" + cacheName + "' is of unexpected type " + (cachedObject == null ? "<null>" : cachedObject.getClass().getName()));
 			return ContentCache.NO_CACHED_VALUE;
 		}
 		return (String) cachedObject;
