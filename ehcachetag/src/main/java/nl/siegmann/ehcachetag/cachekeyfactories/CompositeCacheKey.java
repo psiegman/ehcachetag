@@ -1,7 +1,5 @@
 package nl.siegmann.ehcachetag.cachekeyfactories;
 
-import java.io.Serializable;
-
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
