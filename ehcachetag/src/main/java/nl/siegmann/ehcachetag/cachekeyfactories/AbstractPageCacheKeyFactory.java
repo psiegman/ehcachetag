@@ -1,6 +1,5 @@
 package nl.siegmann.ehcachetag.cachekeyfactories;
 
-import java.io.Serializable;
 import java.util.Map;
 
 import javax.servlet.jsp.JspContext;

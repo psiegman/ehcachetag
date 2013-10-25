@@ -14,9 +14,17 @@ public class EHCacheTagServletContextListener implements ServletContextListener 
 	
 	@Override
 	public void contextInitialized(ServletContextEvent servletContextEvent) {
+
+		// get the class name of the cacheKeyMetaFactory
 		String metaFactoryClassName = servletContextEvent.getServletContext().getInitParameter(EHCacheTagConstants.METAFACTORY_CLASS_PARAM_NAME);
+		
+		// get the configuration of the cacheKeyMetaFactory
 		String factoriesPropertiesString = servletContextEvent.getServletContext().getInitParameter(EHCacheTagConstants.METAFACTORY_CONFIG_PARAM_NAME);
+		
+		// create the metaFactory
 		CacheKeyMetaFactory cacheKeyMetaFactory = createCacheKeyMetaFactory(metaFactoryClassName, factoriesPropertiesString);
+		
+		// store metaFactory in servletContext
 		servletContextEvent.getServletContext().setAttribute(EHCacheTagConstants.METAFACTORY_ATTRIBUTE_NAME, cacheKeyMetaFactory);
 	}
 
@@ -26,11 +34,11 @@ public class EHCacheTagServletContextListener implements ServletContextListener 
 			result = (CacheKeyMetaFactory) Class.forName(cacheKeyMetaFactoryClassName).newInstance();
 			result.init(propertiesAsString);
 		} catch (InstantiationException e) {
-			LOG.error(e.getMessage(), e);
+			LOG.error(e.toString());
 		} catch (IllegalAccessException e) {
-			LOG.error(e.getMessage(), e);
+			LOG.error(e.toString());
 		} catch (ClassNotFoundException e) {
-			LOG.error(e.getMessage(), e);
+			LOG.error(e.toString());
 		}
 		return result;
 	}

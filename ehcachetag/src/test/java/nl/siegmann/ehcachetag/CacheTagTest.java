@@ -24,9 +24,6 @@ public class CacheTagTest {
 	private PageContext pageContext;
 	
 	@Mock
-	private BodyContent bodyContent;
-
-	@Mock
 	private JspWriter jspWriter = Mockito.mock(JspWriter.class);
 	
 	private CacheTag testSubject;
@@ -37,10 +34,44 @@ public class CacheTagTest {
 		this.testSubject = new CacheTag();
 		testSubject.setContentCache(contentCache);
 		testSubject.setPageContext(pageContext);
-		testSubject.setBodyContent(bodyContent);
 		Mockito.when(pageContext.getOut()).thenReturn(jspWriter);
 	}
 
+	@Test
+	public void testGetCacheKey_nullKey_nullFactory() {
+		// when
+		Object cacheKey = testSubject.createCacheKey();
+		
+		// then
+		Assert.assertNull(cacheKey);
+	}
+	
+	@Test
+	public void testGetCacheKey_validKey_nullFactory() {
+		// given
+		testSubject.setKey("hello");
+		
+		// when
+		Object cacheKey = testSubject.createCacheKey();
+		
+		// then
+		Assert.assertEquals("hello", cacheKey);
+	}
+
+	@Test
+	public void testGetCacheKey_validKey_validFactory_nullFromFactory() {
+		// given
+		testSubject.setKey("hello");
+		testSubject.setKeyFactory("testKeyFactory");
+//		CacheKeyFactory cacheKeyFactory = Mockito.mock(CacheKeyFactory.class);
+//		Mockito.when(cacheKeyFactory.createCacheKey(Mockito.any(String.class), Mockito.any(JspContext.class))).thenReturn(null);
+		
+		// when
+		Object cacheKey = testSubject.createCacheKey();
+		
+		// then
+		Assert.assertNull(cacheKey);
+	}
 	
 	@Test
 	public void testDoStartTag_null_cache_key() {
@@ -56,26 +87,26 @@ public class CacheTagTest {
 
 		// then
 		Assert.assertEquals(BodyTagSupport.EVAL_BODY_INCLUDE, actualResult);
-		Mockito.verify(pageContext).getAttribute(EHCacheTagConstants.METAFACTORY_ATTRIBUTE_NAME, PageContext.APPLICATION_SCOPE);
-		Mockito.verifyNoMoreInteractions(contentCache, jspWriter, pageContext, bodyContent);
+		Mockito.verifyNoMoreInteractions(contentCache, jspWriter, pageContext);
 	}
 
 
 	@Test
-	public void doTestStartTag_cached_Content() throws JspException {
+	public void doTestStartTag_cached_Content() throws JspException, IOException {
 		// given
-		Mockito.when(contentCache.getContent("ehcachetag", "greeting")).thenReturn("Hello, world!");
 		testSubject.setCache("ehcachetag");
 		testSubject.setKey("greeting");
-		
+		Mockito.when(contentCache.getContent("ehcachetag", "greeting")).thenReturn("Hello, world!");
+
 		// when
 		int startTagReturn = testSubject.doStartTag();
 		
 		// then
 		Assert.assertEquals(BodyTagSupport.SKIP_BODY, startTagReturn);
 		Mockito.verify(contentCache).getContent("ehcachetag", "greeting");
-		Mockito.verify(pageContext).getAttribute(EHCacheTagConstants.METAFACTORY_ATTRIBUTE_NAME, PageContext.APPLICATION_SCOPE);
-		Mockito.verifyNoMoreInteractions(contentCache, jspWriter, pageContext, bodyContent);
+		Mockito.verify(pageContext).getOut();
+		Mockito.verify(jspWriter).write("Hello, world!");
+		Mockito.verifyNoMoreInteractions(contentCache, jspWriter, pageContext);
 	}
 
 	@Test
@@ -91,8 +122,7 @@ public class CacheTagTest {
 		// then
 		Assert.assertEquals(BodyTagSupport.EVAL_BODY_BUFFERED, startTagReturn);
 		Mockito.verify(contentCache).getContent("XXX", "greeting");
-		Mockito.verify(pageContext).getAttribute(EHCacheTagConstants.METAFACTORY_ATTRIBUTE_NAME, PageContext.APPLICATION_SCOPE);
-		Mockito.verifyNoMoreInteractions(contentCache, jspWriter, pageContext, bodyContent);
+		Mockito.verifyNoMoreInteractions(contentCache, jspWriter, pageContext);
 	}
 	
 	@Test
@@ -104,17 +134,17 @@ public class CacheTagTest {
 		
 		// then
 		Assert.assertEquals(BodyTagSupport.EVAL_PAGE, endTagReturn);
-		Mockito.verify(pageContext).getOut();
-		Mockito.verify(bodyContent).writeOut(jspWriter);
-		Mockito.verify(pageContext).getAttribute(EHCacheTagConstants.METAFACTORY_ATTRIBUTE_NAME, PageContext.APPLICATION_SCOPE);
-		Mockito.verifyNoMoreInteractions(contentCache, jspWriter, pageContext, bodyContent);
+		Mockito.verifyNoMoreInteractions(contentCache, jspWriter, pageContext);
 	}
 	
 	@Test
 	public void testEndTag_no_cache_value() throws JspException, IOException {
 		// given
-		testSubject.setKey("mykey");
+		testSubject.setCacheKey("mykey");
 		testSubject.setCache("ehcachetag");
+
+		BodyContent bodyContent = Mockito.mock(BodyContent.class);
+		testSubject.setBodyContent(bodyContent);
 		Mockito.when(bodyContent.getString()).thenReturn("body_value");	
 		
 		// when
@@ -126,22 +156,6 @@ public class CacheTagTest {
 		Mockito.verify(pageContext).getOut();
 		Mockito.verify(bodyContent).getString();
 		Mockito.verify(jspWriter).write("body_value");
-		Mockito.verify(pageContext).getAttribute(EHCacheTagConstants.METAFACTORY_ATTRIBUTE_NAME, PageContext.APPLICATION_SCOPE);
-		Mockito.verifyNoMoreInteractions(contentCache, jspWriter, pageContext, bodyContent);
-	}
-	
-	@Test
-	public void testEndTag_cached_value() throws JspException, IOException {
-		// given
-		testSubject.setCachedBodyContent("cached_value");
-		
-		// when
-		int endTagReturn = testSubject.doEndTag();
-		
-		// then
-		Assert.assertEquals(BodyTagSupport.EVAL_PAGE, endTagReturn);
-		Mockito.verify(pageContext).getOut();
-		Mockito.verify(jspWriter).write("cached_value");
 		Mockito.verifyNoMoreInteractions(contentCache, jspWriter, pageContext, bodyContent);
 	}
 }

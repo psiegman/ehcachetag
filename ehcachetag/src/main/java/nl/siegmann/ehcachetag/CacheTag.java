@@ -3,15 +3,23 @@ package nl.siegmann.ehcachetag;
 import java.io.IOException;
 
 import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.tagext.BodyContent;
 import javax.servlet.jsp.tagext.BodyTagSupport;
 import javax.servlet.jsp.tagext.Tag;
 
 import nl.siegmann.ehcachetag.cachekeyfactories.CacheKeyFactory;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * A tag for caching jsp page fragments.
+ * 
+ * When in doubt or anything goes wrong it will not use information from the cache but generate it anew.
+ * 
+ * @author paul
+ *
+ */
 public class CacheTag extends BodyTagSupport {
 
 	/**
@@ -24,9 +32,11 @@ public class CacheTag extends BodyTagSupport {
 	private Object key;
 	private String cacheName = EHCacheTagConstants.DEFAULT_CACHE_NAME;
 	private String keyFactoryName;
-	private String cachedBodyContent = ContentCache.NO_CACHED_VALUE;
 	private ContentCache contentCache = new ContentCache();
 
+	// Actual key for caching, either the key attribute or the result of the cacheKeyFactory
+	private Object cacheKey;
+	
 	/**
 	 * Tries to get the body content from the cache using the cacheKey.
 	 * 
@@ -45,17 +55,15 @@ public class CacheTag extends BodyTagSupport {
 		return (String) cachedObject;
 	}
 	
-	/**
-	 * Looks for a cacheKeyFactory and has it create a cachekey, returns the cacheKey attribute otherwise.
-	 * 
-	 * @return a cache key created by the cacheFactory, the cacheKey attribute if no cacheKeyFactory found.
-	 */
-	private Object getCacheKey() {
-		Object cacheKey = getCacheKeyFromFactory(this.key);
-		if (cacheKey == null) {
-			cacheKey = this.key;
+	// test
+	Object createCacheKey() {
+		if (StringUtils.isBlank(keyFactoryName)) {
+			// if there is no key factory defined then we use the hard-coded key
+			return key;
 		}
-		return cacheKey;
+		
+		// use the cacheKeyFactory to determine the key
+		return getCacheKeyFromFactory(this.key);
 	}
 	
 	/**
@@ -77,68 +85,73 @@ public class CacheTag extends BodyTagSupport {
 	/**
 	 * Writes the content of the body to the pageContext writer.
 	 * The content may come from the cache.
+	 * <br/>
+	 * Three scenarios:<br/>
+	 * 1. Key is null : proceed as normal, return EVAL_BODY_INCLUDE<br/>
+	 * 2. Key is not null, no cached value found: create cached body value, return EVAL_BODY_BUFFERED<br/>
+	 * 3. Key is not null, cached value found: SKIP_BODY.<br/>
+	 * 
 	 * @throws IOException 
 	 * 
 	 */
 	@Override
 	public int doStartTag() throws JspException {
-		Object cacheKey = getCacheKey();
+
+		this.cacheKey = createCacheKey();
 
 		if (cacheKey == null) {
-			// unable to create a cache key.
-			// generate and write body content in the normal way
+			// no cacheKey: generate and write body content in the normal way
 			return BodyTagSupport.EVAL_BODY_INCLUDE;
 		}
 		
-		cachedBodyContent = getCachedBodyContent(cacheName, cacheKey);
+		String cachedBodyContent = getCachedBodyContent(cacheName, cacheKey);
 
 		int result;
 
 		if (cachedBodyContent == ContentCache.NO_CACHED_VALUE) {
-			// we have no cached content
+			// we have no cached content, start buffering the bodyContent
 			result = BodyTagSupport.EVAL_BODY_BUFFERED;
 		} else {
-			// we have cached content, don't execute the body
-			result = BodyTagSupport.SKIP_BODY;
-		}
-		return result;
-	}
-
-	@Override
-	public int doEndTag() throws JspException {
-		if (cachedBodyContent == ContentCache.NO_CACHED_VALUE) {
-			// no cached bodycontent available
-			// store new generated bodycontent in cache
-			cachedBodyContent = updateCache(bodyContent);
-		}
-		
-		if (cachedBodyContent == ContentCache.NO_CACHED_VALUE) {
-			// write regular bodycontent to output
-			// XXX doStartTag can return BodyTagSupport.EVAL_BODY_INCLUDE, do we have a bodyContent then?
-			try {
-				bodyContent.writeOut(pageContext.getOut());
-			} catch (IOException e) {
-				throw new JspException(e);
-			}
-		} else {
-			// write cached bodycontent to output
+			// we have cached content: write content and skip body
 			try {
 				pageContext.getOut().write(cachedBodyContent);
 			} catch (IOException e) {
 				throw new JspException(e);
 			}
+		
+			result = BodyTagSupport.SKIP_BODY;
 		}
-		return Tag.EVAL_PAGE;
+		return result;
 	}
-	
-	private String updateCache(BodyContent bodyContent) {
-		Object cacheKey = getCacheKey();
-		if (cacheKey == null) {
-			return ContentCache.NO_CACHED_VALUE;
+
+	/**
+	 * Two scenarios:<br/>
+	 * 1. key is null or bodyContent is null: do nothing<br/>
+	 * 2. otherwise: store bodyContent in cache using cacheKey
+	 */
+	@Override
+	public int doEndTag() throws JspException {
+		int result = Tag.EVAL_PAGE;
+		
+		if (cacheKey == null || bodyContent == null) {
+			return result;
 		}
+		
+		// store new bodyContent using cacheKey.
 		String bodyContentAsString = bodyContent.getString();
 		contentCache.putContent(cacheName, cacheKey, bodyContentAsString);
-		return bodyContentAsString;
+		
+		// write bodyContent
+		try {
+			pageContext.getOut().write(bodyContentAsString);
+		} catch (IOException e) {
+			throw new JspException(e);
+		}
+		
+		// cleanup for the next user
+		cacheKey = null;
+		
+		return result;
 	}
 
 	// test
@@ -170,8 +183,7 @@ public class CacheTag extends BodyTagSupport {
 		this.keyFactoryName = keyFactoryName;
 	}
 
-	// test
-	void setCachedBodyContent(String cachedBodyContent) {
-		this.cachedBodyContent = cachedBodyContent;
+	void setCacheKey(Object cacheKey) {
+		this.cacheKey = cacheKey;
 	}
 }

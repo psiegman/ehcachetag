@@ -17,7 +17,7 @@
 		<body-content>JSP</body-content>
 		<attribute>
 			<name>key</name>
-			<type>java.io.Serializable</type>
+			<type>java.lang.Object</type>
 		</attribute>
 		<attribute>
 			<name>cache</name>
