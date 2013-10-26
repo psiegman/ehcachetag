@@ -13,6 +13,7 @@
 		<param-value>
 		url=nl.siegmann.ehcachetag.UrlCacheKeyFactory
 		nocache=nl.siegmann.ehcachetag.NoCacheKeyFactory
+		username=nl.siegmann.ehcachetag.cachekeyfactories.RequestAttributeCacheKeyFactory?attribute=username
 		</param-value>
 	</context-param>
 		
