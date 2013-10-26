@@ -1,6 +1,8 @@
 # EHCache Taglib
 ## Introduction
 
+A taglib that uses ehcache to cache parts of a jsp page.
+
 ## Basic example
 
 ehcache.xml
