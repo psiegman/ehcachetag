@@ -63,8 +63,6 @@ public class CacheTagTest {
 		// given
 		testSubject.setKey("hello");
 		testSubject.setKeyFactory("testKeyFactory");
-//		CacheKeyFactory cacheKeyFactory = Mockito.mock(CacheKeyFactory.class);
-//		Mockito.when(cacheKeyFactory.createCacheKey(Mockito.any(String.class), Mockito.any(JspContext.class))).thenReturn(null);
 		
 		// when
 		Object cacheKey = testSubject.createCacheKey();

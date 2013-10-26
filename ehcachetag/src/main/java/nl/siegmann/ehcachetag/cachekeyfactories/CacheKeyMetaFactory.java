@@ -3,6 +3,8 @@ package nl.siegmann.ehcachetag.cachekeyfactories;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import javax.servlet.ServletContext;
+
 /**
  * Central location for managing cacheKeyFactories.
  * 
@@ -30,9 +32,9 @@ public interface CacheKeyMetaFactory {
 	/**
 	 * Called once after application is initialized.
 	 * 
-	 * @param propertiesAsString
+	 * @param servletContext
 	 */
-	void init(String propertiesAsString);
+	void init(ServletContext servletContext);
 	
 	/**
 	 * Called once on application destroy.

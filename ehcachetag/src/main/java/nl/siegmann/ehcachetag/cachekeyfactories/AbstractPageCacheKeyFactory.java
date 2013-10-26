@@ -1,14 +1,13 @@
 package nl.siegmann.ehcachetag.cachekeyfactories;
 
-import java.util.Map;
-
+import javax.servlet.ServletContext;
 import javax.servlet.jsp.JspContext;
 import javax.servlet.jsp.PageContext;
 
 public abstract class AbstractPageCacheKeyFactory implements CacheKeyFactory {
 
 	@Override
-	public void init(Map<String, String> properties) {
+	public void init(ServletContext servletContext) {
 	}
 
 	@Override

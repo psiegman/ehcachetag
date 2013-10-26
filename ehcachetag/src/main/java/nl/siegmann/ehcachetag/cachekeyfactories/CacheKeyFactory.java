@@ -1,7 +1,6 @@
 package nl.siegmann.ehcachetag.cachekeyfactories;
 
-import java.util.Map;
-
+import javax.servlet.ServletContext;
 import javax.servlet.jsp.JspContext;
 
 /**
@@ -19,7 +18,7 @@ public interface CacheKeyFactory {
 	 * 
 	 * @param properties
 	 */
-	void init(Map<String, String> properties);
+	void init(ServletContext servletContext);
 	
 	/**
 	 * Called the cacheTag to create a new cacheKey.
