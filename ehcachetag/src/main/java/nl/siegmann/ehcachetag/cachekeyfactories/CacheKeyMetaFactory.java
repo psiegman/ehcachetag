@@ -1,7 +1,7 @@
 package nl.siegmann.ehcachetag.cachekeyfactories;
 
+import java.util.Collection;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import javax.servlet.ServletContext;
 
@@ -27,7 +27,7 @@ public interface CacheKeyMetaFactory {
 	 * 
 	 * @return
 	 */
-	Set<Entry<String, CacheKeyFactory>> getCacheKeyFactories();
+	Collection<Entry<String, CacheKeyFactory>> getCacheKeyFactories();
 	
 	/**
 	 * Called once after application is initialized.

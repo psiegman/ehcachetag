@@ -17,9 +17,11 @@ public class EHCacheTagServletContextListener implements ServletContextListener 
 	
 	@Override
 	public void contextInitialized(ServletContextEvent servletContextEvent) {
-
+		
+		ServletContext servletContext = servletContextEvent.getServletContext();
+		
 		// get the class name of the cacheKeyMetaFactory
-		String metaFactoryClassName = servletContextEvent.getServletContext().getInitParameter(EHCacheTagConstants.METAFACTORY_CLASS_PARAM_NAME);
+		String metaFactoryClassName = servletContext.getInitParameter(EHCacheTagConstants.METAFACTORY_CLASS_PARAM_NAME);
 
 		// create the metaFactory
 		CacheKeyMetaFactory cacheKeyMetaFactory;
@@ -28,17 +30,17 @@ public class EHCacheTagServletContextListener implements ServletContextListener 
 			// create Default CacheKeyMetaFactory
 			cacheKeyMetaFactory = new DefaultCacheKeyMetaFactory();
 			try {
-				cacheKeyMetaFactory.init(servletContextEvent.getServletContext());
+				cacheKeyMetaFactory.init(servletContext);
 			} catch (Exception e) {
-				LOG.error(e.toString());
+				LOG.error(e.toString(), e);
 			}
 		} else {
-			cacheKeyMetaFactory = createCacheKeyMetaFactory(metaFactoryClassName, servletContextEvent.getServletContext());
+			cacheKeyMetaFactory = createCacheKeyMetaFactory(metaFactoryClassName, servletContext);
 		}
 		
 		// store metaFactory in servletContext
 		if (cacheKeyMetaFactory != null) {
-			servletContextEvent.getServletContext().setAttribute(EHCacheTagConstants.METAFACTORY_ATTRIBUTE_NAME, cacheKeyMetaFactory);
+			servletContext.setAttribute(EHCacheTagConstants.METAFACTORY_ATTRIBUTE_NAME, cacheKeyMetaFactory);
 		}
 	}
 
@@ -48,7 +50,7 @@ public class EHCacheTagServletContextListener implements ServletContextListener 
 			result = (CacheKeyMetaFactory) Class.forName(cacheKeyMetaFactoryClassName).newInstance();
 			result.init(servletContext);
 		} catch (Exception e) {
-			LOG.error(e.toString());
+			LOG.error(e.toString(), e);
 		}
 		return result;
 	}
@@ -60,7 +62,7 @@ public class EHCacheTagServletContextListener implements ServletContextListener 
 			try {
 				cacheKeyMetaFactory.destroy();
 			} catch(Exception e) {
-				LOG.error(e.toString());
+				LOG.error(e.toString(), e);
 			}
 		}
 	}

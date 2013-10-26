@@ -46,13 +46,16 @@ public class BeanFactory {
 
 	private static Properties parseProperties(String propertiesString) {
 		
-		Properties properties = new Properties();
+		Properties result = new Properties();
+		if (StringUtils.isBlank(propertiesString)) {
+			return result;
+		}
 		try {
-			properties.load(new StringReader(propertiesString));
+			result.load(new StringReader(propertiesString));
 		} catch (IOException e) {
 			LOG.error(e.toString());
 		}
-		return properties;
+		return result;
 	}
 	
 	public static <T> T  createBean(String beanCreateRequest) {
