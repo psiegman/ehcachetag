@@ -1,8 +1,10 @@
-package nl.siegmann.ehcachetag.cachekeyfactories;
+package nl.siegmann.ehcachetag.util;
 
 import java.util.Map;
 
 import junit.framework.Assert;
+
+import nl.siegmann.ehcachetag.util.BeanFactory;
 
 import org.junit.Test;
 

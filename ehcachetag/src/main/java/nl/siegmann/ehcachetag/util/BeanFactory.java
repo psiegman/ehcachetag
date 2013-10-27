@@ -1,4 +1,4 @@
-package nl.siegmann.ehcachetag.cachekeyfactories;
+package nl.siegmann.ehcachetag.util;
 
 import java.io.IOException;
 import java.io.StringReader;
