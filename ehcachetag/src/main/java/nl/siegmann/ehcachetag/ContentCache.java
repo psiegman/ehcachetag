@@ -1,5 +1,7 @@
 package nl.siegmann.ehcachetag;
 
+import java.io.Serializable;
+
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
 
@@ -9,7 +11,12 @@ import net.sf.ehcache.Element;
  * @author paul
  *
  */
-class ContentCache {
+class ContentCache implements Serializable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -3991729685862770264L;
 
 	public static final String NO_CACHED_VALUE = new String();
 	
