@@ -10,6 +10,7 @@ import javax.servlet.ServletContext;
 import nl.siegmann.ehcachetag.EHCacheTagConstants;
 import nl.siegmann.ehcachetag.util.BeanFactory;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,8 +35,11 @@ import org.slf4j.LoggerFactory;
  */
 public class DefaultCacheKeyMetaFactory implements CacheKeyMetaFactory {
 
+	public static final String DEFAULT_CACHE_FACTORY_NAME = "default";
+	
 	private static final Logger LOG = LoggerFactory.getLogger(DefaultCacheKeyMetaFactory.class);
 	private Map<String, CacheKeyFactory> cacheKeyFactories = new HashMap<String, CacheKeyFactory>();
+	private CacheKeyFactory defaultCacheKeyFactory;
 	
 	public void init(ServletContext servletContext) {
 
@@ -51,12 +55,23 @@ public class DefaultCacheKeyMetaFactory implements CacheKeyMetaFactory {
 			}
 			CacheKeyFactory cacheKeyFactory = (CacheKeyFactory) mapEntry.getValue();
 			cacheKeyFactory.init(servletContext);
+			
+			String name = mapEntry.getKey();
+			if (DEFAULT_CACHE_FACTORY_NAME.equalsIgnoreCase(name)) {
+				defaultCacheKeyFactory = cacheKeyFactory;
+			}
 			cacheKeyFactories.put(mapEntry.getKey(), cacheKeyFactory);
+		}
+		if (defaultCacheKeyFactory == null) {
+			defaultCacheKeyFactory = new DefaultCacheKeyFactory();
 		}
 	}
 
 	@Override
 	public CacheKeyFactory getCacheKeyFactory(String cacheKeyFactoryName) {
+		if (StringUtils.isBlank(cacheKeyFactoryName) || DEFAULT_CACHE_FACTORY_NAME.equals(cacheKeyFactoryName)) {
+			return defaultCacheKeyFactory;
+		}
 		return cacheKeyFactories.get(cacheKeyFactoryName);
 	}
 
