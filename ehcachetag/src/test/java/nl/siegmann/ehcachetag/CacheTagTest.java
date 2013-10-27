@@ -11,6 +11,7 @@ import javax.servlet.jsp.tagext.BodyTagSupport;
 
 import nl.siegmann.ehcachetag.cachekeyfactories.CacheKeyFactory;
 import nl.siegmann.ehcachetag.cachekeyfactories.CacheKeyMetaFactory;
+import nl.siegmann.ehcachetag.cachekeyfactories.CacheLocation;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -50,7 +51,7 @@ public class CacheTagTest {
 	@Test
 	public void testGetCacheKey_nullKey_nullFactory() {
 		// when
-		Object cacheKey = testSubject.createCacheKey();
+		CacheLocation cacheKey = testSubject.createCacheLocation();
 		
 		// then
 		Assert.assertNull(cacheKey);
@@ -64,10 +65,10 @@ public class CacheTagTest {
 		Mockito.when(pageContext.findAttribute(EHCacheTagConstants.METAFACTORY_ATTRIBUTE_NAME)).thenReturn(null);
 				
 		// when
-		Object cacheKey = testSubject.createCacheKey();
+		CacheLocation cacheLocation = testSubject.createCacheLocation();
 		
 		// then
-		Assert.assertEquals("hello", cacheKey);
+		Assert.assertEquals("hello", cacheLocation.getCacheKey());
 	}
 
 	@Test
@@ -79,7 +80,7 @@ public class CacheTagTest {
 		Mockito.when(cacheKeyMetaFactory.getCacheKeyFactory(null)).thenReturn(null);
 				
 		// when
-		Object cacheKey = testSubject.createCacheKey();
+		CacheLocation cacheKey = testSubject.createCacheLocation();
 		
 		// then
 		Assert.assertEquals(null, cacheKey);
@@ -93,15 +94,16 @@ public class CacheTagTest {
 		
 		Mockito.when(pageContext.findAttribute(EHCacheTagConstants.METAFACTORY_ATTRIBUTE_NAME)).thenReturn(cacheKeyMetaFactory);
 		Mockito.when(cacheKeyMetaFactory.getCacheKeyFactory(null)).thenReturn(cacheKeyFactory);
-		Mockito.when(cacheKeyFactory.createCacheKey(Mockito.eq("hello"), Mockito.any(JspContext.class))).thenReturn("hello");
+		Mockito.when(cacheKeyFactory.createCacheLocation(Mockito.eq("hello"), Mockito.any(JspContext.class))).thenReturn(new CacheLocation("hello"));
 				
 		// when
-		Object cacheKey = testSubject.createCacheKey();
+		CacheLocation cacheLocation = testSubject.createCacheLocation();
 		
 		// then
-		Assert.assertEquals("hello", cacheKey);
+		Assert.assertEquals("hello", cacheLocation.getCacheKey());
+		Assert.assertEquals(EHCacheTagConstants.DEFAULT_CACHE_NAME, cacheLocation.getCacheName());
 		Mockito.verify(cacheKeyMetaFactory).getCacheKeyFactory(null);
-		Mockito.verify(cacheKeyFactory).createCacheKey("hello", pageContext);
+		Mockito.verify(cacheKeyFactory).createCacheLocation("hello", pageContext);
 	}
 
 	@Test
@@ -112,15 +114,15 @@ public class CacheTagTest {
 
 		Mockito.when(pageContext.findAttribute(EHCacheTagConstants.METAFACTORY_ATTRIBUTE_NAME)).thenReturn(cacheKeyMetaFactory);
 		Mockito.when(cacheKeyMetaFactory.getCacheKeyFactory("testKeyFactory")).thenReturn(cacheKeyFactory);
-		Mockito.when(cacheKeyFactory.createCacheKey(Mockito.eq("hello"), Mockito.any(JspContext.class))).thenReturn(null);
+		Mockito.when(cacheKeyFactory.createCacheLocation(Mockito.eq("hello"), Mockito.any(JspContext.class))).thenReturn(null);
 		
 		// when
-		Object cacheKey = testSubject.createCacheKey();
+		CacheLocation cacheLocation = testSubject.createCacheLocation();
 		
 		// then
-		Assert.assertNull(cacheKey);
+		Assert.assertNull(cacheLocation);
 		Mockito.verify(cacheKeyMetaFactory).getCacheKeyFactory("testKeyFactory");
-		Mockito.verify(cacheKeyFactory).createCacheKey("hello", pageContext);
+		Mockito.verify(cacheKeyFactory).createCacheLocation("hello", pageContext);
 	}
 	
 	@Test
@@ -149,14 +151,14 @@ public class CacheTagTest {
 		testSubject.setKey("greeting");
 
 		// setup cache content
-		Mockito.when(contentCache.getContent("ehcachetag", "greeting")).thenReturn("Hello, world!");
+		Mockito.when(contentCache.getContent(new CacheLocation("greeting", "ehcachetag"))).thenReturn("Hello, world!");
 
 		// when
 		int startTagReturn = testSubject.doStartTag();
 		
 		// then
 		Assert.assertEquals(BodyTagSupport.SKIP_BODY, startTagReturn);
-		Mockito.verify(contentCache).getContent("ehcachetag", "greeting");
+		Mockito.verify(contentCache).getContent(new CacheLocation("greeting", "ehcachetag"));
 		Mockito.verify(pageContext).getOut();
 		Mockito.verify(jspWriter).write("Hello, world!");
 		Mockito.verify(pageContext).findAttribute(EHCacheTagConstants.METAFACTORY_ATTRIBUTE_NAME);
@@ -173,17 +175,17 @@ public class CacheTagTest {
 		Mockito.when(pageContext.findAttribute(EHCacheTagConstants.METAFACTORY_ATTRIBUTE_NAME)).thenReturn(cacheKeyMetaFactory);
 		Mockito.when(cacheKeyMetaFactory.getCacheKeyFactory(null)).thenReturn(cacheKeyFactory);
 		// emulate default cacheKeyFactory
-		Mockito.when(cacheKeyFactory.createCacheKey(Mockito.eq("greeting"), Mockito.any(JspContext.class))).thenReturn("greeting");
+		Mockito.when(cacheKeyFactory.createCacheLocation(Mockito.eq("greeting"), Mockito.any(JspContext.class))).thenReturn(new CacheLocation("greeting"));
 
 		// setup cache content
-		Mockito.when(contentCache.getContent("ehcachetag", "greeting")).thenReturn("Hello, world!");
+		Mockito.when(contentCache.getContent(new CacheLocation("greeting", "ehcachetag"))).thenReturn("Hello, world!");
 
 		// when
 		int startTagReturn = testSubject.doStartTag();
 		
 		// then
 		Assert.assertEquals(BodyTagSupport.SKIP_BODY, startTagReturn);
-		Mockito.verify(contentCache).getContent("ehcachetag", "greeting");
+		Mockito.verify(contentCache).getContent(new CacheLocation("greeting", "ehcachetag"));
 		Mockito.verify(pageContext).getOut();
 		Mockito.verify(jspWriter).write("Hello, world!");
 		Mockito.verify(pageContext).findAttribute(EHCacheTagConstants.METAFACTORY_ATTRIBUTE_NAME);
@@ -193,7 +195,7 @@ public class CacheTagTest {
 	@Test
 	public void doTestStartTag_cached_null_Content() throws JspException {
 		// given
-		Mockito.when(contentCache.getContent(Mockito.anyString(), Mockito.anyString())).thenReturn(ContentCache.NO_CACHED_VALUE);
+		Mockito.when(contentCache.getContent(Mockito.any(CacheLocation.class))).thenReturn(ContentCache.NO_CACHED_VALUE);
 		testSubject.setCache("XXX");
 		testSubject.setKey("greeting");
 		
@@ -202,7 +204,7 @@ public class CacheTagTest {
 		
 		// then
 		Assert.assertEquals(BodyTagSupport.EVAL_BODY_BUFFERED, startTagReturn);
-		Mockito.verify(contentCache).getContent("XXX", "greeting");
+		Mockito.verify(contentCache).getContent(new CacheLocation("greeting", "XXX"));
 		Mockito.verify(pageContext).findAttribute(EHCacheTagConstants.METAFACTORY_ATTRIBUTE_NAME);
 		Mockito.verifyNoMoreInteractions(contentCache, jspWriter, pageContext);
 	}
@@ -222,8 +224,7 @@ public class CacheTagTest {
 	@Test
 	public void testEndTag_no_cache_value() throws JspException, IOException {
 		// given
-		testSubject.setCacheKey("mykey");
-		testSubject.setCache("ehcachetag");
+		testSubject.setCacheLocation(new CacheLocation("mykey", "ehcachetag"));
 
 		BodyContent bodyContent = Mockito.mock(BodyContent.class);
 		testSubject.setBodyContent(bodyContent);
@@ -234,7 +235,7 @@ public class CacheTagTest {
 		
 		// then
 		Assert.assertEquals(BodyTagSupport.EVAL_PAGE, endTagReturn);
-		Mockito.verify(contentCache).putContent("ehcachetag", "mykey", "body_value");
+		Mockito.verify(contentCache).putContent(new CacheLocation("mykey", "ehcachetag"), "body_value");
 		Mockito.verify(pageContext).getOut();
 		Mockito.verify(bodyContent).getString();
 		Mockito.verify(jspWriter).write("body_value");

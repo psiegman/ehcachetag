@@ -14,12 +14,12 @@ public class RequestAttributeCacheKeyFactory extends AbstractPageCacheKeyFactory
 	private String attribute;
 	
 	@Override
-	public Object createCacheKey(Object tagCacheKey, PageContext pageContext) {
+	public CacheLocation createCacheLocation(Object tagCacheKey, PageContext pageContext) {
 		Object attributeValue = ((HttpServletRequest) pageContext.getRequest()).getAttribute(attribute);
 		if (attributeValue == null) {
 			return null;
 		}
-		return new CompositeCacheKey(tagCacheKey, attributeValue);
+		return new CacheLocation(new CompositeCacheKey(tagCacheKey, attributeValue));
 	}
 
 	public String getAttribute() {

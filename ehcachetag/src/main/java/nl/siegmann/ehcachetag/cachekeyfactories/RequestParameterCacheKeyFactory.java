@@ -14,12 +14,12 @@ public class RequestParameterCacheKeyFactory extends AbstractPageCacheKeyFactory
 	private String parameter;
 	
 	@Override
-	public Object createCacheKey(Object tagCacheKey, PageContext pageContext) {
+	public CacheLocation createCacheLocation(Object tagCacheKey, PageContext pageContext) {
 		Object parameterValue = ((HttpServletRequest) pageContext.getRequest()).getParameter(parameter);
 		if (parameterValue == null) {
 			return null;
 		}
-		return new CompositeCacheKey(tagCacheKey, parameterValue);
+		return new CacheLocation(new CompositeCacheKey(tagCacheKey, parameterValue));
 	}
 
 	public String getParameter() {

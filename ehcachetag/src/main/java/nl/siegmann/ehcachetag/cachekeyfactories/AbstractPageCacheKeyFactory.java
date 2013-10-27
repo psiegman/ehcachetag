@@ -11,15 +11,15 @@ public abstract class AbstractPageCacheKeyFactory implements CacheKeyFactory {
 	}
 
 	@Override
-	public Object createCacheKey(Object tagCacheKey,
+	public CacheLocation createCacheLocation(Object tagCacheKey,
 			JspContext jspContext) {
 		if (! (jspContext instanceof PageContext)) {
 			return null;
 		}
-		return createCacheKey(tagCacheKey, (PageContext) jspContext);
+		return createCacheLocation(tagCacheKey, (PageContext) jspContext);
 	}
 
-	public abstract Object createCacheKey(Object tagCacheKey,
+	public abstract CacheLocation createCacheLocation(Object tagCacheKey,
 			PageContext pageContext);
 	
 	

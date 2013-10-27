@@ -10,7 +10,7 @@ public abstract class AbstractCacheKeyFactory implements CacheKeyFactory {
 	}
 
 	@Override
-	public abstract Object createCacheKey(Object tagCacheKey,
+	public abstract CacheLocation createCacheLocation(Object tagCacheKey,
 			JspContext jspContext);
 
 	@Override

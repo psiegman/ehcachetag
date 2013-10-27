@@ -11,7 +11,7 @@ import javax.servlet.jsp.PageContext;
 public class DefaultCacheKeyFactory extends AbstractPageCacheKeyFactory {
 
 	@Override
-	public Object createCacheKey(Object tagCacheKey, PageContext pageContext) {
-		return tagCacheKey;
+	public CacheLocation createCacheLocation(Object tagCacheKey, PageContext pageContext) {
+		return new CacheLocation(tagCacheKey);
 	}
 }

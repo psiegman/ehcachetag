@@ -14,8 +14,8 @@ import javax.servlet.jsp.PageContext;
 public class LocaleCacheKeyFactory extends AbstractPageCacheKeyFactory {
 
 	@Override
-	public Object createCacheKey(Object tagCacheKey, PageContext pageContext) {
+	public CacheLocation createCacheLocation(Object tagCacheKey, PageContext pageContext) {
 		Locale locale = ((HttpServletRequest) pageContext.getRequest()).getLocale();
-		return new CompositeCacheKey(tagCacheKey, locale);
+		return new CacheLocation(new CompositeCacheKey(tagCacheKey, locale));
 	}
 }

@@ -28,7 +28,7 @@ public interface CacheKeyFactory {
 	 * 
 	 * @return A newly generated cacheKey. Null will be interpreted as "do not cache".
 	 */
-	Object createCacheKey(Object tagCacheKey, JspContext jspContext);
+	CacheLocation createCacheLocation(Object tagCacheKey, JspContext jspContext);
 	
 	/**
 	 * Called on Application shutdown.
