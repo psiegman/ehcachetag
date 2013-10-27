@@ -42,6 +42,10 @@ public class EHCacheTagServletContextListener implements ServletContextListener 
 		if (cacheKeyMetaFactory != null) {
 			servletContext.setAttribute(EHCacheTagConstants.METAFACTORY_ATTRIBUTE_NAME, cacheKeyMetaFactory);
 		}
+		
+		if (cacheKeyMetaFactory != null) {
+			LOG.info("Initialized EHCacheTag with cacheKeyMetaFactory " + cacheKeyMetaFactory.getClass().getName());
+		}
 	}
 
 	private CacheKeyMetaFactory createCacheKeyMetaFactory(String cacheKeyMetaFactoryClassName, ServletContext servletContext) {
