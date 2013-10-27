@@ -29,14 +29,17 @@ public class CacheTag extends BodyTagSupport {
 
 	private static final Logger LOG = LoggerFactory.getLogger(CacheTag.class);
 	
+	// attributes set in the jsp page
 	private Object key;
 	private String cacheName = EHCacheTagConstants.DEFAULT_CACHE_NAME;
 	private String keyFactoryName;
+	
+	// utility class
 	private ContentCache contentCache = new ContentCache();
 
 	// Actual key for caching as created by the CacheKeyFactory used.
 	private Object cacheKey;
-	
+		
 	/**
 	 * Writes the content of the body to the pageContext writer.
 	 * The content may come from the cache.
@@ -73,6 +76,10 @@ public class CacheTag extends BodyTagSupport {
 			} catch (IOException e) {
 				throw new JspException(e);
 			}
+			
+			// set cacheKey to null so that the endTag knows
+			// it does not have to store anything in the cache
+			cacheKey = null;
 			
 			result = BodyTagSupport.SKIP_BODY;
 		}
@@ -131,7 +138,7 @@ public class CacheTag extends BodyTagSupport {
 	public int doEndTag() throws JspException {
 		int result = Tag.EVAL_PAGE;
 		
-		if (cacheKey == null || bodyContent == null) {
+		if (cacheKey == null) {
 			return result;
 		}
 		
@@ -146,7 +153,7 @@ public class CacheTag extends BodyTagSupport {
 			throw new JspException(e);
 		}
 		
-		// cleanup for the next user
+		// cleanup for the next use
 		cacheKey = null;
 		
 		return result;
