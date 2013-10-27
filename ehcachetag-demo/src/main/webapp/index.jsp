@@ -45,7 +45,7 @@ Note how the text only once per minute:<br/>
 </ect:cache>
 <hr/>
 <h2>Using a simple keyFactory</h2>
-This uses the username keyFactory. This keyFactory uses the 'username' request parameter as part of the cacheKey.<br/>
+This uses the username keyFactory. This keyFactory uses the 'p' request parameter as part of the cacheKey.<br/>
 <h3>Java source</h3>
 <pre class="code">
 public class RequestParameterCacheKeyFactory extends AbstractPageCacheKeyFactory {
