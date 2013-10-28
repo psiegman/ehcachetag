@@ -1,4 +1,4 @@
-package nl.siegmann.ehcachetag.cachekeyfactories;
+package nl.siegmann.ehcachetag.cachetagmodifier;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.builder.ToStringBuilder;
@@ -23,7 +23,6 @@ public class CompositeCacheKey {
 	}
 
 	public String toString() {
-		return ToStringBuilder.reflectionToString(this);
+		return new ToStringBuilder(this).append("keyComponents", keyComponents).toString();
 	}
-
 }

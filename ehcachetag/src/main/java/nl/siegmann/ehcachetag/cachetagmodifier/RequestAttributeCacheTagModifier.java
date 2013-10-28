@@ -1,7 +1,9 @@
-package nl.siegmann.ehcachetag.cachekeyfactories;
+package nl.siegmann.ehcachetag.cachetagmodifier;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.PageContext;
+
+import nl.siegmann.ehcachetag.CacheTag;
 
 /**
  * Creates a cachekey by combining the cacheKey from the tag with the Locale from the pageContext request.
@@ -9,17 +11,20 @@ import javax.servlet.jsp.PageContext;
  * @author paul
  *
  */
-public class RequestAttributeCacheKeyFactory extends AbstractPageCacheKeyFactory {
+public class RequestAttributeCacheTagModifier extends AbstractCacheTagModifier {
 
 	private String attribute;
 	
 	@Override
-	public CacheLocation createCacheLocation(Object tagCacheKey, PageContext pageContext) {
+	public void beforeLookup(CacheTag cacheTag, PageContext pageContext) {
 		Object attributeValue = ((HttpServletRequest) pageContext.getRequest()).getAttribute(attribute);
+		Object cacheKey;
 		if (attributeValue == null) {
-			return null;
+			cacheKey = null;
+		} else {
+			cacheKey = new CompositeCacheKey(cacheTag.getKey(), attributeValue);
 		}
-		return new CacheLocation(new CompositeCacheKey(tagCacheKey, attributeValue));
+		cacheTag.setKey(cacheKey);
 	}
 
 	public String getAttribute() {

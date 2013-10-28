@@ -4,8 +4,8 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
-import nl.siegmann.ehcachetag.cachekeyfactories.CacheKeyMetaFactory;
-import nl.siegmann.ehcachetag.cachekeyfactories.DefaultCacheKeyMetaFactory;
+import nl.siegmann.ehcachetag.cachetagmodifier.CacheTagModifierFactory;
+import nl.siegmann.ehcachetag.cachetagmodifier.DefaultCacheTagModifierFactory;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -21,14 +21,14 @@ public class EHCacheTagServletContextListener implements ServletContextListener 
 		ServletContext servletContext = servletContextEvent.getServletContext();
 		
 		// get the class name of the cacheKeyMetaFactory
-		String metaFactoryClassName = servletContext.getInitParameter(EHCacheTagConstants.METAFACTORY_CLASS_PARAM_NAME);
+		String metaFactoryClassName = servletContext.getInitParameter(EHCacheTagConstants.MODIFIER_FACTORY_CLASS_PARAM);
 
 		// create the metaFactory
-		CacheKeyMetaFactory cacheKeyMetaFactory;
+		CacheTagModifierFactory cacheKeyMetaFactory;
 		
 		if (StringUtils.isBlank(metaFactoryClassName)) {
 			// create Default CacheKeyMetaFactory
-			cacheKeyMetaFactory = new DefaultCacheKeyMetaFactory();
+			cacheKeyMetaFactory = new DefaultCacheTagModifierFactory();
 			try {
 				cacheKeyMetaFactory.init(servletContext);
 			} catch (Exception e) {
@@ -40,7 +40,7 @@ public class EHCacheTagServletContextListener implements ServletContextListener 
 		
 		// store metaFactory in servletContext
 		if (cacheKeyMetaFactory != null) {
-			servletContext.setAttribute(EHCacheTagConstants.METAFACTORY_ATTRIBUTE_NAME, cacheKeyMetaFactory);
+			servletContext.setAttribute(EHCacheTagConstants.MODIFIER_FACTORY_ATTRIBUTE, cacheKeyMetaFactory);
 		}
 		
 		if (cacheKeyMetaFactory != null) {
@@ -48,10 +48,10 @@ public class EHCacheTagServletContextListener implements ServletContextListener 
 		}
 	}
 
-	private CacheKeyMetaFactory createCacheKeyMetaFactory(String cacheKeyMetaFactoryClassName, ServletContext servletContext) {
-		CacheKeyMetaFactory result = null;
+	private CacheTagModifierFactory createCacheKeyMetaFactory(String cacheKeyMetaFactoryClassName, ServletContext servletContext) {
+		CacheTagModifierFactory result = null;
 		try {
-			result = (CacheKeyMetaFactory) Class.forName(cacheKeyMetaFactoryClassName).newInstance();
+			result = (CacheTagModifierFactory) Class.forName(cacheKeyMetaFactoryClassName).newInstance();
 			result.init(servletContext);
 		} catch (Exception e) {
 			LOG.error(e.toString(), e);
@@ -61,7 +61,7 @@ public class EHCacheTagServletContextListener implements ServletContextListener 
 	
 	@Override
 	public void contextDestroyed(ServletContextEvent servletContextEvent) {
-		CacheKeyMetaFactory cacheKeyMetaFactory = (CacheKeyMetaFactory) servletContextEvent.getServletContext().getAttribute(EHCacheTagConstants.METAFACTORY_ATTRIBUTE_NAME);
+		CacheTagModifierFactory cacheKeyMetaFactory = (CacheTagModifierFactory) servletContextEvent.getServletContext().getAttribute(EHCacheTagConstants.MODIFIER_FACTORY_ATTRIBUTE);
 		if (cacheKeyMetaFactory != null) {
 			try {
 				cacheKeyMetaFactory.destroy();

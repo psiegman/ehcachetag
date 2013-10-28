@@ -2,6 +2,8 @@ package nl.siegmann.ehcachetag.cachekeyfactories;
 
 import junit.framework.Assert;
 
+import nl.siegmann.ehcachetag.cachetagmodifier.CompositeCacheKey;
+
 import org.junit.Test;
 
 public class CompositeCacheKeyTest {

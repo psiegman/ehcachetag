@@ -4,7 +4,6 @@ import java.io.Serializable;
 
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
-import nl.siegmann.ehcachetag.cachekeyfactories.CacheLocation;
 
 /**
  * Wrapper around the CacheManager that makes it easier to mock the CacheManager.
@@ -21,15 +20,15 @@ class ContentCache implements Serializable {
 
 	public static final String NO_CACHED_VALUE = new String();
 	
-	public Object getContent(CacheLocation cacheLocation) {
-		Element cacheElement = CacheManager.getInstance().getCache(cacheLocation.getCacheName()).get(cacheLocation.getCacheKey());
+	public Object getContent(String cacheName, Object cacheKey) {
+		Element cacheElement = CacheManager.getInstance().getEhcache(cacheName).get(cacheKey);
 		if (cacheElement == null) {
 			return NO_CACHED_VALUE;
 		}
 		return cacheElement.getObjectValue();
 	}
 	
-	public void putContent(CacheLocation cacheLocation, String cacheValue) {
-		CacheManager.getInstance().getCache(cacheLocation.getCacheName()).put(new Element(cacheLocation.getCacheKey(), cacheValue));
+	public void putContent(String cacheName, Object cacheKey, String cacheValue) {
+		CacheManager.getInstance().getEhcache(cacheName).put(new Element(cacheKey, cacheValue));
 	}
 }

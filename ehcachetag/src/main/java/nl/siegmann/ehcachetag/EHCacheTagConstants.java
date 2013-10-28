@@ -3,19 +3,19 @@ package nl.siegmann.ehcachetag;
 public class EHCacheTagConstants {
 	
 	/**
-	 * The name of the class to use for the cachekey metafactory.
+	 * The web.xml config parameter that the EHCacheTagServletContextListener uses for the implementation class of the CacheTagModifierFactory.
 	 */
-	public static final String METAFACTORY_CLASS_PARAM_NAME = "ehcachetag.cacheKeyMetaFactoryClass";
+	public static final String MODIFIER_FACTORY_CLASS_PARAM = "ehcachetag.cacheTageModifierFactory";
 	
 	/**
-	 * The configuration to use for the cachekey metafactory.
+	 * The web.xml config parameter that the DefaultCacheTagModifierFactory uses for its configuration.
 	 */
-	public static final String METAFACTORY_CONFIG_PARAM_NAME = "ehcachetag.cacheKeyMetaFactoryConfig";
+	public static final String MODIFIER_FACTORY_CONFIG_PARAM = "ehcachetag.cacheTageModifierFactoryConfig";
 
 	/**
-	 * The attribute name under which the CacheKeyMetaFactory is stored in the web application context.
+	 * The attribute name under which the CacheTagModifierFactory is stored in the web application context.
 	 */
-	public static final String METAFACTORY_ATTRIBUTE_NAME = "ehcachetag.cacheKeyMetaFactory";
+	public static final String MODIFIER_FACTORY_ATTRIBUTE = "ehcachetag.cacheTagModifierFactory";
 
 	/**
 	 * The name of the default cache.

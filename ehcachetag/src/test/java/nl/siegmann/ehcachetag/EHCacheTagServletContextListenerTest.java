@@ -1,16 +1,12 @@
 package nl.siegmann.ehcachetag;
 
-import java.util.Collection;
-import java.util.Map.Entry;
-
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 
 import junit.framework.Assert;
-
-import nl.siegmann.ehcachetag.cachekeyfactories.CacheKeyFactory;
-import nl.siegmann.ehcachetag.cachekeyfactories.CacheKeyMetaFactory;
-import nl.siegmann.ehcachetag.cachekeyfactories.DefaultCacheKeyMetaFactory;
+import nl.siegmann.ehcachetag.cachetagmodifier.CacheTagModifier;
+import nl.siegmann.ehcachetag.cachetagmodifier.CacheTagModifierFactory;
+import nl.siegmann.ehcachetag.cachetagmodifier.DefaultCacheTagModifierFactory;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -36,18 +32,12 @@ public class EHCacheTagServletContextListenerTest {
 		TestMetaCacheKeyFactory.servletContext = null;
 	}
 	
-	static class TestMetaCacheKeyFactory implements CacheKeyMetaFactory {
+	static class TestMetaCacheKeyFactory implements CacheTagModifierFactory {
 
 		public static ServletContext servletContext;
 		
 		@Override
-		public CacheKeyFactory getCacheKeyFactory(String cacheKeyFactoryName) {
-			// TODO Auto-generated method stub
-			return null;
-		}
-
-		@Override
-		public Collection<Entry<String, CacheKeyFactory>> getCacheKeyFactories() {
+		public CacheTagModifier getCacheTagModifier(String cacheTagPreProcessorName) {
 			// TODO Auto-generated method stub
 			return null;
 		}
@@ -72,7 +62,7 @@ public class EHCacheTagServletContextListenerTest {
 		
 		// then
 		Mockito.verify(servletContextEvent).getServletContext();
-		Mockito.verify(servletContext).setAttribute(Mockito.eq(EHCacheTagConstants.METAFACTORY_ATTRIBUTE_NAME), Mockito.any(DefaultCacheKeyMetaFactory.class));
+		Mockito.verify(servletContext).setAttribute(Mockito.eq(EHCacheTagConstants.MODIFIER_FACTORY_ATTRIBUTE), Mockito.any(DefaultCacheTagModifierFactory.class));
 		
 	}
 
@@ -86,7 +76,7 @@ public class EHCacheTagServletContextListenerTest {
 		
 		// then
 		Mockito.verify(servletContextEvent).getServletContext();
-		Mockito.verify(servletContext).setAttribute(Mockito.eq(EHCacheTagConstants.METAFACTORY_ATTRIBUTE_NAME), Mockito.any(DefaultCacheKeyMetaFactory.class));
+		Mockito.verify(servletContext).setAttribute(Mockito.eq(EHCacheTagConstants.MODIFIER_FACTORY_ATTRIBUTE), Mockito.any(DefaultCacheTagModifierFactory.class));
 		Assert.assertNotNull(TestMetaCacheKeyFactory.servletContext);
 	}
 }

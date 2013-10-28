@@ -24,7 +24,7 @@
 			<type>java.lang.String</type>
 		</attribute>
 		<attribute>
-			<name>keyFactory</name>
+			<name>modifiers</name>
 			<type>java.lang.String</type>
 		</attribute>
 	</tag>
