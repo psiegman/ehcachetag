@@ -21,6 +21,8 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import sun.font.TrueTypeFont;
+
 
 /**
  * A tag for caching jsp page fragments.
@@ -32,7 +34,7 @@ import org.slf4j.LoggerFactory;
  */
 public class CacheTag extends BodyTagSupport {
 
-	static final String NO_CACHE = new String();
+	static final String NO_SUCH_CACHE = new String();
 	static final String NO_CACHED_VALUE = new String();
 
 	private static final long serialVersionUID = 333106287254149880L;
@@ -60,8 +62,13 @@ public class CacheTag extends BodyTagSupport {
 	@Override
 	public int doStartTag() throws JspException {
 
-		doBeforeLookup();
-
+		try {
+			doBeforeLookup();
+		} catch (Exception e) {
+			cleanup();
+			return BodyTagSupport.EVAL_BODY_INCLUDE;
+		}
+		
 		if (StringUtils.isBlank(cacheName)) {
 			cacheName = EHCacheTagConstants.DEFAULT_CACHE_NAME;
 		}
@@ -74,7 +81,8 @@ public class CacheTag extends BodyTagSupport {
 		
 		String cachedBodyContent = getCachedBodyContent(cacheName, key);
 
-		if (cachedBodyContent == NO_CACHE) {
+		// no such cache,: generate and write body content in the normal way
+		if (cachedBodyContent == NO_SUCH_CACHE) {
 			cleanup();
 			return BodyTagSupport.EVAL_BODY_INCLUDE;
 		}
@@ -85,13 +93,20 @@ public class CacheTag extends BodyTagSupport {
 			// we have a key but no cached content, start buffering the bodyContent
 			result = BodyTagSupport.EVAL_BODY_BUFFERED;
 		} else {
-			// we have cached content: write content and skip body
-			cachedBodyContent = doAfterRetrieval(cachedBodyContent);
+			try {
+				cachedBodyContent = doAfterRetrieval(cachedBodyContent);
+			} catch (Exception e) {
+				cleanup();
+				return BodyTagSupport.EVAL_BODY_INCLUDE;
+			}
 
+			// we have cached content: write content and skip body
 			try {
 				pageContext.getOut().write(cachedBodyContent);
 			} catch (IOException e) {
 				throw new JspException(e);
+			} finally {
+				cleanup();
 			}
 			
 			// set cacheKey to null so that the endTag knows
@@ -107,7 +122,7 @@ public class CacheTag extends BodyTagSupport {
 	 * This method is called before doing a lookup in the cache.
 	 * Invoke the cacheTagInterceptor.beforeLookup.
 	 */
-	void doBeforeLookup() {
+	void doBeforeLookup() throws Exception {
 		for (CacheTagModifier cacheTagModifier: findCacheTagInterceptor()) {
 			cacheTagModifier.beforeLookup(this, pageContext);
 		}
@@ -119,7 +134,7 @@ public class CacheTag extends BodyTagSupport {
 	 * @param content
 	 * @return
 	 */
-	String doBeforeUpdate(String content) {
+	private String doBeforeUpdate(String content) throws Exception {
 		String result = content;
 		for (CacheTagModifier cacheTagModifier: findCacheTagInterceptor()) {
 			result = cacheTagModifier.beforeUpdate(this, pageContext, result);
@@ -132,7 +147,7 @@ public class CacheTag extends BodyTagSupport {
 	 * @param content
 	 * @return
 	 */
-	String doAfterRetrieval(String content) {
+	private String doAfterRetrieval(String content) throws Exception {
 		String result = content;
 		for (CacheTagModifier cacheTagModifier: findCacheTagInterceptor()) {
 			result = cacheTagModifier.afterRetrieval(this, pageContext, result);
@@ -173,8 +188,8 @@ public class CacheTag extends BodyTagSupport {
 	 */
 	private String getCachedBodyContent(String cacheName, Object cacheKey) {
 		Object cachedObject = getContent(cacheName, cacheKey);
-		if (cachedObject == NO_CACHED_VALUE) {
-			return NO_CACHED_VALUE;
+		if (cachedObject == NO_CACHED_VALUE || cachedObject == NO_SUCH_CACHE) {
+			return (String) cachedObject;
 		}
 		if(! (cachedObject instanceof String)) {
 			LOG.error("Cached object with key '" + cacheKey + "' in cache '" + cacheName + "' is of unexpected type " + (cachedObject == null ? "<null>" : cachedObject.getClass().getName()) + ", called with tag with key \'" + key + "\' (after modification), class " + pageContext.getPage().getClass().getName() + " and url " + getLocationForLog());
@@ -197,9 +212,16 @@ public class CacheTag extends BodyTagSupport {
 			return result;
 		}
 		
-		// store new bodyContent using cacheKey.
+		// modify content before storing
 		String bodyContentAsString = bodyContent.getString();
-		bodyContentAsString = doBeforeUpdate(bodyContentAsString);
+		try {
+			bodyContentAsString = doBeforeUpdate(bodyContentAsString);
+		} catch (Exception e) {
+			cleanup();
+			return result;
+		}
+
+		// store new bodyContent using cacheKey.
 		putContent(cacheName, key, bodyContentAsString);
 		
 		// write bodyContent
@@ -226,14 +248,12 @@ public class CacheTag extends BodyTagSupport {
 	}
 	
 	private Object getContent(String cacheName, Object cacheKey) {
-		CacheManager cacheManager = getCacheManager();
-		Ehcache ehcache = cacheManager.getEhcache(cacheName);
+		Ehcache ehcache = getCache(cacheName);
 		if (ehcache == null) {
-			LOG.error("Cache with name \'" + cacheName + "\' not found, called with tag with key \'" + key + "\' (after modification), class " + pageContext.getPage().getClass().getName() + " and url " + getLocationForLog());
-			return NO_CACHE;
+			return NO_SUCH_CACHE;
 		}
+
 		Element cacheElement = ehcache.get(cacheKey);
-//		Element cacheElement = getCacheManager().getEhcache(cacheName).get(cacheKey);
 		if (cacheElement == null) {
 			return NO_CACHED_VALUE;
 		}
@@ -241,14 +261,20 @@ public class CacheTag extends BodyTagSupport {
 	}
 	
 	private void putContent(String cacheName, Object cacheKey, String cacheValue) {
-		Ehcache ehcache = getCacheManager().getEhcache(cacheName);
-		if (ehcache == null) {
-			LOG.error("Cache with name \'" + cacheName + "\' not found, called with tag with key \'" + key + "\' (after modification), class " + pageContext.getPage().getClass().getName() + " and url " + getLocationForLog());
-		} else {
+		Ehcache ehcache = getCache(cacheName);
+		if (ehcache != null) {
 			ehcache.put(new Element(cacheKey, cacheValue));
 		}
 	}
 
+	private Ehcache getCache(String cacheName) {
+		Ehcache result = getCacheManager().getEhcache(cacheName);
+		if (result == null) {
+			LOG.error("Cache with name \'" + cacheName + "\' not found, called with tag with key \'" + key + "\' (after modification), class " + pageContext.getPage().getClass().getName() + " and url " + getLocationForLog());
+		}
+		return result;
+	}
+	
 	private String getLocationForLog() {
 		ServletRequest request = pageContext.getRequest();
 		if (request instanceof HttpServletRequest) {
