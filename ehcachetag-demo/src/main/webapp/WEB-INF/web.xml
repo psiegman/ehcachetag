@@ -3,23 +3,25 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
 
+<!-- 
+	<context-param>
+		<param-name>ehcachetag.cacheTageModifierFactory</param-name>
+		<param-value>nl.siegmann.ehcachetag.cachetagmodifier.DefaultCacheTagModifierFactory</param-value>
+	</context-param>
+-->	
     <listener>
         <listener-class>
 			nl.siegmann.ehcachetag.EHCacheTagServletContextListener
         </listener-class>
     </listener>
-<!-- 
-	<context-param>
-		<param-name>ehcachetag.cacheKeyMetaFactoryClass</param-name>
-		<param-value>nl.siegmann.ehcachetag.DefaultCacheKeyMetaFactory</param-value>
-	</context-param>
--->	
 
 	<context-param>
-		<param-name>ehcachetag.cacheKeyMetaFactoryConfig</param-name>
+		<param-name>ehcachetag.cacheTageModifierFactoryConfig</param-name>
 		<param-value>
-		nocache=nl.siegmann.ehcachetag.cachekeyfactories.NoCacheKeyFactory
-		pparam=nl.siegmann.ehcachetag.cachekeyfactories.RequestParameterCacheKeyFactory?parameter=p
+		locale=nl.siegmann.ehcachetag.cachetagmodifier.LocaleCacheTagModifier
+		nocache=nl.siegmann.ehcachetag.cachetagmodifier.DoNotCacheModifier
+		pparam=nl.siegmann.ehcachetag.cachetagmodifier.RequestParameterCacheTagModifier?parameter=p
+		debug=nl.siegmann.ehcachetag.cachetagmodifier.DebugCacheTagModifier
 		</param-value>
 	</context-param>
 	
