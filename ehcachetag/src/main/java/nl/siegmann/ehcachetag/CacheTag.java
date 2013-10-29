@@ -21,8 +21,6 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import sun.font.TrueTypeFont;
-
 
 /**
  * A tag for caching jsp page fragments.
@@ -62,6 +60,7 @@ public class CacheTag extends BodyTagSupport {
 	@Override
 	public int doStartTag() throws JspException {
 
+		// do the beforeLookup modifiers
 		try {
 			doBeforeLookup();
 		} catch (Exception e) {
@@ -69,6 +68,7 @@ public class CacheTag extends BodyTagSupport {
 			return BodyTagSupport.EVAL_BODY_INCLUDE;
 		}
 		
+		// revert to default cache if no cache set
 		if (StringUtils.isBlank(cacheName)) {
 			cacheName = EHCacheTagConstants.DEFAULT_CACHE_NAME;
 		}
@@ -247,6 +247,13 @@ public class CacheTag extends BodyTagSupport {
 		modifiers = NO_MODIFIERS;
 	}
 	
+	/**
+	 * Try and get cached content.
+	 * 
+	 * @param cacheName
+	 * @param cacheKey
+	 * @return Cached content, NO_SUCH_CACHE if the cache does not exist, NO_CACHED_VALUE of there is no matching value in the cache.
+	 */
 	private Object getContent(String cacheName, Object cacheKey) {
 		Ehcache ehcache = getCache(cacheName);
 		if (ehcache == null) {
@@ -260,6 +267,13 @@ public class CacheTag extends BodyTagSupport {
 		return cacheElement.getObjectValue();
 	}
 	
+	/**
+	 * Update the cached value with the cacheValue.
+	 * 
+	 * @param cacheName
+	 * @param cacheKey
+	 * @param cacheValue
+	 */
 	private void putContent(String cacheName, Object cacheKey, String cacheValue) {
 		Ehcache ehcache = getCache(cacheName);
 		if (ehcache != null) {
