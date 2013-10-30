@@ -1,5 +1,7 @@
 package nl.siegmann.ehcachetag.cachetagmodifier;
 
+import java.util.Collection;
+
 import javax.servlet.ServletContext;
 
 /**
@@ -11,6 +13,20 @@ import javax.servlet.ServletContext;
 public interface CacheTagModifierFactory {
 
 	/**
+	 * Called once after application is initialized.
+	 * 
+	 * @param servletContext
+	 */
+	void init(ServletContext servletContext);
+
+	/**
+	 * The names of the available cacheTagModifiers
+	 * 
+	 * @return The names of the available cacheTagModifiers
+	 */
+	Collection<String> getCacheTagModifierNames();
+
+	/**
 	 * Gets the cacheTagModifier with the given name, null if not found.
 	 * 
 	 * @param cacheTagModifierName name of the CacheTagModifier we're looking for.
@@ -19,13 +35,6 @@ public interface CacheTagModifierFactory {
 	 */
 	CacheTagModifier getCacheTagModifier(String cacheTagInterceptorName);
 
-	/**
-	 * Called once after application is initialized.
-	 * 
-	 * @param servletContext
-	 */
-	void init(ServletContext servletContext);
-	
 	/**
 	 * Called once on application destroy.
 	 * 

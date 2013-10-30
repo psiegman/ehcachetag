@@ -1,9 +1,6 @@
 package nl.siegmann.ehcachetag;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
@@ -16,6 +13,7 @@ import net.sf.ehcache.Ehcache;
 import net.sf.ehcache.Element;
 import nl.siegmann.ehcachetag.cachetagmodifier.CacheTagModifier;
 import nl.siegmann.ehcachetag.cachetagmodifier.CacheTagModifierFactory;
+import nl.siegmann.ehcachetag.util.StringUtil;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -119,12 +117,39 @@ public class CacheTag extends BodyTagSupport {
 	}
 
 	/**
+	 * Internal exception that is used in case a modifier is search for but not found.
+	 * 
+	 * @author paul
+	 *
+	 */
+	private static final class ModifierNotFoundException extends Exception {
+
+		private static final long serialVersionUID = 4535024464306691589L;
+
+		public ModifierNotFoundException(String message) {
+			super(message);
+		}
+	}
+	
+	/**
 	 * This method is called before doing a lookup in the cache.
 	 * Invoke the cacheTagInterceptor.beforeLookup.
 	 */
 	void doBeforeLookup() throws Exception {
-		for (CacheTagModifier cacheTagModifier: findCacheTagInterceptor()) {
-			cacheTagModifier.beforeLookup(this, pageContext);
+		CacheTagModifierFactory cacheTagModifierFactory = getCacheTagModifierFactory();
+		if (cacheTagModifierFactory == null) {
+			return;
+		}
+		
+		for (String modifierName: modifiers) {
+			CacheTagModifier cacheTagModifier = getCacheTagModifier(cacheTagModifierFactory, modifierName);
+
+			try {
+				cacheTagModifier.beforeLookup(this, pageContext);
+			} catch (Exception e) {
+				LOG.error("Modifier with name '" + modifierName + "' and class " + cacheTagModifier.getClass().getName() + " threw " + e.getClass().getName() + " at " + getLocationForLog());
+				throw e;
+			}
 		}
 	}
 	
@@ -135,51 +160,75 @@ public class CacheTag extends BodyTagSupport {
 	 * @return
 	 */
 	private String doBeforeUpdate(String content) throws Exception {
+
 		String result = content;
-		for (CacheTagModifier cacheTagModifier: findCacheTagInterceptor()) {
-			result = cacheTagModifier.beforeUpdate(this, pageContext, result);
+		CacheTagModifierFactory cacheTagModifierFactory = getCacheTagModifierFactory();
+		if (cacheTagModifierFactory == null) {
+			return result;
+		}
+		
+		for (String modifierName: modifiers) {
+			CacheTagModifier cacheTagModifier = getCacheTagModifier(cacheTagModifierFactory, modifierName);
+
+			try {
+				result = cacheTagModifier.beforeUpdate(this, pageContext, result);
+			} catch (Exception e) {
+				LOG.error("Modifier with name '" + modifierName + "' and class " + cacheTagModifier.getClass().getName() + " threw " + e.getClass().getName() + " at " + getLocationForLog());
+				throw e;
+			}
 		}
 		return result;
 	}
 
 	/**
 	 * Called after content is retrieved from the cache but before it is written to the response.
+	 * 
 	 * @param content
 	 * @return
 	 */
 	private String doAfterRetrieval(String content) throws Exception {
+
 		String result = content;
-		for (CacheTagModifier cacheTagModifier: findCacheTagInterceptor()) {
-			result = cacheTagModifier.afterRetrieval(this, pageContext, result);
+		CacheTagModifierFactory cacheTagModifierFactory = getCacheTagModifierFactory();
+		if (cacheTagModifierFactory == null) {
+			return result;
 		}
-		return result;
-	}
-
-
-	/**
-	 * Finds the CacheTagModifiers to use.
-	 * 
-	 * @return will always return a list, empty if applicable.
-	 */
-	private List<CacheTagModifier> findCacheTagInterceptor() {
-		// locate the cacheKeyMetaFactory
-		CacheTagModifierFactory cacheTagInterceptorFactory = (CacheTagModifierFactory) pageContext.findAttribute(EHCacheTagConstants.MODIFIER_FACTORY_ATTRIBUTE);
-		if (cacheTagInterceptorFactory == null) {
-			return Collections.emptyList();
-		}
-
-		List<CacheTagModifier> result = new ArrayList<CacheTagModifier>(modifiers.length);
+		
 		for (String modifierName: modifiers) {
-			// let the cacheKeyMetaFactory determine the cacheKey
-			CacheTagModifier cacheTagModifier = cacheTagInterceptorFactory.getCacheTagModifier(modifierName);
-			if (cacheTagModifier != null) {
-				result.add(cacheTagModifier);
+			CacheTagModifier cacheTagModifier = getCacheTagModifier(cacheTagModifierFactory, modifierName);
+
+			try {
+				result = cacheTagModifier.afterRetrieval(this, pageContext, result);
+			} catch (Exception e) {
+				LOG.error("Modifier with name '" + modifierName + "' and class " + cacheTagModifier.getClass().getName() + " threw " + e.getClass().getName() + " at " + getLocationForLog());
+				throw e;
 			}
 		}
-
 		return result;
 	}
 
+	private CacheTagModifier getCacheTagModifier(CacheTagModifierFactory cacheTagModifierFactory, String modifierName) throws ModifierNotFoundException {
+		CacheTagModifier result = cacheTagModifierFactory.getCacheTagModifier(modifierName);
+		if (result == null) {
+			String closestMatch = StringUtil.getClosestMatchingString(modifierName, cacheTagModifierFactory.getCacheTagModifierNames());
+			String message = "CacheTagModifier with name \'" + modifierName + "\' not found at " + getLocationForLog() + "." + (closestMatch == null ? "" : " Did you mean \'" + closestMatch + "\' ?");
+			LOG.error(message);
+			throw new ModifierNotFoundException(message);
+		}
+		return result;
+
+	}
+
+	/**
+	 * locate the cacheKeyMetaFactory
+	 * 
+	 * @return
+	 */
+	private CacheTagModifierFactory getCacheTagModifierFactory() {
+		return (CacheTagModifierFactory) pageContext.findAttribute(EHCacheTagConstants.MODIFIER_FACTORY_ATTRIBUTE);
+	}
+
+	
 	/**
 	 * Tries to get the body content from the cache using the cacheKey.
 	 * 
@@ -192,7 +241,7 @@ public class CacheTag extends BodyTagSupport {
 			return (String) cachedObject;
 		}
 		if(! (cachedObject instanceof String)) {
-			LOG.error("Cached object with key '" + cacheKey + "' in cache '" + cacheName + "' is of unexpected type " + (cachedObject == null ? "<null>" : cachedObject.getClass().getName()) + ", called with tag with key \'" + key + "\' (after modification), class " + pageContext.getPage().getClass().getName() + " and url " + getLocationForLog());
+			LOG.error("Cached object with key '" + cacheKey + "' in cache '" + cacheName + "' is of unexpected type " + (cachedObject == null ? "<null>" : cachedObject.getClass().getName()) + ", at " + getLocationForLog());
 			return NO_CACHED_VALUE;
 		}
 		return (String) cachedObject;
@@ -217,8 +266,7 @@ public class CacheTag extends BodyTagSupport {
 		try {
 			bodyContentAsString = doBeforeUpdate(bodyContentAsString);
 		} catch (Exception e) {
-			cleanup();
-			return result;
+			LOG.error("modifier threw exception: " + e);
 		}
 
 		// store new bodyContent using cacheKey.
@@ -284,18 +332,25 @@ public class CacheTag extends BodyTagSupport {
 	private Ehcache getCache(String cacheName) {
 		Ehcache result = getCacheManager().getEhcache(cacheName);
 		if (result == null) {
-			LOG.error("Cache with name \'" + cacheName + "\' not found, called with tag with key \'" + key + "\' (after modification), class " + pageContext.getPage().getClass().getName() + " and url " + getLocationForLog());
+			LOG.error("Cache with name \'" + cacheName + "\' not found at " + getLocationForLog());
 		}
 		return result;
 	}
 	
+	/**
+	 * Generate a location of this tag within the system for logging purposes.
+	 * 
+	 * @return
+	 */
 	private String getLocationForLog() {
+		StringBuilder result = new StringBuilder();
+		result.append("cache tag with key \'" + key + "\' (after modification)");
+		result.append(", class " + pageContext.getPage().getClass().getName());
 		ServletRequest request = pageContext.getRequest();
 		if (request instanceof HttpServletRequest) {
-			return ((HttpServletRequest) request).getRequestURI();
-		} else {
-			return "<unknown>";
+			result.append(" and url " + ((HttpServletRequest) request).getRequestURI());
 		}
+		return result.toString();
 	}
 	
 	CacheManager getCacheManager() {

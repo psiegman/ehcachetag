@@ -1,5 +1,6 @@
 package nl.siegmann.ehcachetag.cachetagmodifier;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -70,9 +71,15 @@ public class DefaultCacheTagModifierFactory implements CacheTagModifierFactory {
 		if (StringUtils.isBlank(cacheTagInterceptorName) || DEFAULT_CACHETAG_MODIFIER_NAME.equals(cacheTagInterceptorName)) {
 			return defaultCacheTagModifier;
 		}
+		
 		return cacheTagModifiers.get(cacheTagInterceptorName);
 	}
 
+	@Override
+	public Collection<String> getCacheTagModifierNames() {
+		return cacheTagModifiers.keySet();
+	}
+	
 	@Override
 	public void destroy() {
 		for (CacheTagModifier cacheTagPreProcessor: cacheTagModifiers.values()) {
