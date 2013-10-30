@@ -1,5 +1,7 @@
 package nl.siegmann.ehcachetag;
 
+import java.util.Collection;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 
@@ -52,6 +54,11 @@ public class EHCacheTagServletContextListenerTest {
 			// TODO Auto-generated method stub
 			
 		}
+
+		@Override
+		public Collection<String> getCacheTagModifierNames() {
+			return null;
+		}
 		
 	}
 	@Test
@@ -69,7 +76,7 @@ public class EHCacheTagServletContextListenerTest {
 	@Test
 	public void test_custom_CacheKeyMetaFactory() {
 		// given
-		Mockito.when(servletContext.getInitParameter("ehcachetag.cacheKeyMetaFactoryClass")).thenReturn(TestMetaCacheKeyFactory.class.getName());
+		Mockito.when(servletContext.getInitParameter(EHCacheTagConstants.MODIFIER_FACTORY_CLASS_PARAM)).thenReturn(TestMetaCacheKeyFactory.class.getName());
 		
 		// when
 		testSubject.contextInitialized(servletContextEvent);
