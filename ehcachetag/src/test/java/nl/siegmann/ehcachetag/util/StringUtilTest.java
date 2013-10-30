@@ -6,7 +6,20 @@ import java.util.Collection;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class StingUtilTest {
+public class StringUtilTest {
+
+	@Test
+	public void testGetClosestMatchingString_null() {
+		// given
+		String input = "a";
+		Collection<String> alternatives = null;
+		
+		// when
+		String actualResult = StringUtil.getClosestMatchingString(input, alternatives);
+		
+		// then
+		Assert.assertNull(actualResult);
+	}
 
 	@Test
 	public void testGetClosestMatchingString1() {
@@ -20,6 +33,7 @@ public class StingUtilTest {
 		// then
 		Assert.assertEquals("b",actualResult);
 	}
+	
 	
 	
 	@Test
