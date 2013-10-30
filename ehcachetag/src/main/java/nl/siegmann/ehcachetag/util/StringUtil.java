@@ -22,14 +22,10 @@ public class StringUtil {
 		String current = null;
 		int minDistance = Integer.MAX_VALUE;
 		for (String alternative: alternatives) {
-			if (current == null) {
-				current = alternative;
-				continue;
-			}
 			int currentDistance = StringUtils.getLevenshteinDistance(input, alternative);
-			if (currentDistance < minDistance) {
-				minDistance = currentDistance;
+			if ((current == null) || (currentDistance < minDistance)) {
 				current = alternative;
+				minDistance = currentDistance;
 			}
 		}
 		return current;
