@@ -2,6 +2,7 @@ package nl.siegmann.ehcachetag;
 
 import java.io.IOException;
 
+import javax.servlet.jsp.JspContext;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspWriter;
 import javax.servlet.jsp.PageContext;
@@ -205,6 +206,54 @@ public class CacheTagTest {
 	}
 	
 	/**
+	 * Test doStartTag where the first modifier throws an exception
+	 * @throws JspException 
+	 */
+	@Test
+	public void doStartTag_modifier_not_found() throws JspException {
+		// given
+		testSubject.setKey("testkey");
+		CacheTagModifier modifier = Mockito.mock(CacheTagModifier.class);
+		Mockito.doThrow(new RuntimeException()).when(modifier).beforeLookup(Mockito.any(CacheTag.class), Mockito.any(JspContext.class));
+		Mockito.when(cacheTagModifierFactory.getCacheTagModifier(Mockito.anyString())).thenReturn(modifier);
+		
+		// when
+		int actualResult = testSubject.doStartTag();
+		
+		// then
+		Assert.assertEquals(BodyTagSupport.EVAL_BODY_INCLUDE, actualResult);
+		
+		// cleanup
+		Assert.assertNull(testSubject.getKey());
+		Assert.assertNull(testSubject.getCache());
+		Assert.assertEquals("", testSubject.getModifiers());
+	}
+	
+	/**
+	 * Test doStartTag where the first modifier throws an exception
+	 * @throws JspException 
+	 */
+	@Test
+	public void doStartTag_modifier_exception() throws JspException {
+		// given
+		testSubject.setKey("testkey");
+		CacheTagModifier modifier = Mockito.mock(CacheTagModifier.class);
+		Mockito.doThrow(new RuntimeException()).when(modifier).beforeLookup(Mockito.any(CacheTag.class), Mockito.any(JspContext.class));
+		Mockito.when(cacheTagModifierFactory.getCacheTagModifier(Mockito.anyString())).thenReturn(modifier);
+		
+		// when
+		int actualResult = testSubject.doStartTag();
+		
+		// then
+		Assert.assertEquals(BodyTagSupport.EVAL_BODY_INCLUDE, actualResult);
+		
+		// cleanup
+		Assert.assertNull(testSubject.getKey());
+		Assert.assertNull(testSubject.getCache());
+		Assert.assertEquals("", testSubject.getModifiers());
+	}
+	
+	/**
 	 * There is no cache key.
 	 * 
 	 * @throws JspException
@@ -362,5 +411,25 @@ public class CacheTagTest {
 
 		// XXX this one fails, commented out for now
 		// Mockito.verifyNoMoreInteractions(pageContext);
+	}
+	
+	@Test
+	public void setModifiers_null() {
+		// when
+		testSubject.setModifiers(null);
+		
+		// then
+		Assert.assertNotNull(testSubject.getModifiers());
+		Assert.assertEquals(0, testSubject.getModifiers().length());
+	}
+
+	@Test
+	public void setModifiers_a____b() {
+		// when
+		testSubject.setModifiers("a,     b");
+		
+		// then
+		Assert.assertNotNull(testSubject.getModifiers());
+		Assert.assertEquals("a,b", testSubject.getModifiers());
 	}
 }
