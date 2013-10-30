@@ -1,4 +1,4 @@
-package nl.siegmann.ehcachetag.cachekeyfactories;
+package nl.siegmann.ehcachetag.cachetagmodifier;
 
 import junit.framework.Assert;
 
