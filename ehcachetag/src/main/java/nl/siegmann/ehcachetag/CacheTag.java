@@ -122,7 +122,7 @@ public class CacheTag extends BodyTagSupport {
 	 * @author paul
 	 *
 	 */
-	private static final class ModifierNotFoundException extends Exception {
+	static final class ModifierNotFoundException extends Exception {
 
 		private static final long serialVersionUID = 4535024464306691589L;
 
@@ -216,7 +216,7 @@ public class CacheTag extends BodyTagSupport {
 	 * @return
 	 * @throws ModifierNotFoundException
 	 */
-	private CacheTagModifier getCacheTagModifier(CacheTagModifierFactory cacheTagModifierFactory, String modifierName) throws ModifierNotFoundException {
+	CacheTagModifier getCacheTagModifier(CacheTagModifierFactory cacheTagModifierFactory, String modifierName) throws ModifierNotFoundException {
 		CacheTagModifier result = cacheTagModifierFactory.getCacheTagModifier(modifierName);
 		if (result == null) {
 			String closestMatch = StringUtil.getClosestMatchingString(modifierName, cacheTagModifierFactory.getCacheTagModifierNames());
@@ -244,11 +244,21 @@ public class CacheTag extends BodyTagSupport {
 	 * @param cacheKey
 	 * @return The cached content, null if none found.
 	 */
-	private String getCachedBodyContent(String cacheName, Object cacheKey) {
-		Object cachedObject = getContent(cacheName, cacheKey);
-		if (cachedObject == NO_CACHED_VALUE || cachedObject == NO_SUCH_CACHE) {
-			return (String) cachedObject;
+	String getCachedBodyContent(String cacheName, Object cacheKey) {
+
+		Ehcache ehcache = getCache(cacheName);
+		if (ehcache == null) {
+			return NO_SUCH_CACHE;
 		}
+
+		Element cacheElement = ehcache.get(cacheKey);
+		if (cacheElement == null) {
+			return NO_CACHED_VALUE;
+		}
+
+		Object cachedObject = cacheElement.getObjectValue();
+		
+		// check this because other parts of the system could also put items in the same cache
 		if(! (cachedObject instanceof String)) {
 			LOG.error("Cached object with key '" + cacheKey + "' in cache '" + cacheName + "' is of unexpected type " + (cachedObject == null ? "<null>" : cachedObject.getClass().getName()) + ", at " + getLocationForLog());
 			return NO_CACHED_VALUE;
@@ -302,26 +312,6 @@ public class CacheTag extends BodyTagSupport {
 		key = null;
 		cacheName = null;
 		modifiers = NO_MODIFIERS;
-	}
-	
-	/**
-	 * Try and get cached content.
-	 * 
-	 * @param cacheName
-	 * @param cacheKey
-	 * @return Cached content, NO_SUCH_CACHE if the cache does not exist, NO_CACHED_VALUE of there is no matching value in the cache.
-	 */
-	private Object getContent(String cacheName, Object cacheKey) {
-		Ehcache ehcache = getCache(cacheName);
-		if (ehcache == null) {
-			return NO_SUCH_CACHE;
-		}
-
-		Element cacheElement = ehcache.get(cacheKey);
-		if (cacheElement == null) {
-			return NO_CACHED_VALUE;
-		}
-		return cacheElement.getObjectValue();
 	}
 	
 	/**
