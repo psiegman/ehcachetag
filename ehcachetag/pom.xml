@@ -10,6 +10,7 @@
 	<properties>
 		<java-version>1.6</java-version>
 		<org.slf4j-version>1.6.6</org.slf4j-version>
+    	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 	<dependencies>
 		<dependency>
