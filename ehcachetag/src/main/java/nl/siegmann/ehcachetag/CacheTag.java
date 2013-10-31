@@ -159,13 +159,14 @@ public class CacheTag extends BodyTagSupport {
 	 * @param content
 	 * @return
 	 */
-	private String doBeforeUpdate(String content) throws Exception {
+	String doBeforeUpdate(String content) throws Exception {
 
-		String result = content;
 		CacheTagModifierFactory cacheTagModifierFactory = getCacheTagModifierFactory();
 		if (cacheTagModifierFactory == null) {
-			return result;
+			return content;
 		}
+
+		String result = content;
 		
 		for (String modifierName: modifiers) {
 			CacheTagModifier cacheTagModifier = getCacheTagModifier(cacheTagModifierFactory, modifierName);
@@ -186,13 +187,13 @@ public class CacheTag extends BodyTagSupport {
 	 * @param content
 	 * @return
 	 */
-	private String doAfterRetrieval(String content) throws Exception {
-
-		String result = content;
+	String doAfterRetrieval(String content) throws Exception {
 		CacheTagModifierFactory cacheTagModifierFactory = getCacheTagModifierFactory();
 		if (cacheTagModifierFactory == null) {
-			return result;
+			return content;
 		}
+		
+		String result = content;
 		
 		for (String modifierName: modifiers) {
 			CacheTagModifier cacheTagModifier = getCacheTagModifier(cacheTagModifierFactory, modifierName);
@@ -207,6 +208,14 @@ public class CacheTag extends BodyTagSupport {
 		return result;
 	}
 
+	/**
+	 * Gets the CacheTagModifier with the given name, throws ModifierNotFoundException if not found.
+	 *  
+	 * @param cacheTagModifierFactory
+	 * @param modifierName
+	 * @return
+	 * @throws ModifierNotFoundException
+	 */
 	private CacheTagModifier getCacheTagModifier(CacheTagModifierFactory cacheTagModifierFactory, String modifierName) throws ModifierNotFoundException {
 		CacheTagModifier result = cacheTagModifierFactory.getCacheTagModifier(modifierName);
 		if (result == null) {

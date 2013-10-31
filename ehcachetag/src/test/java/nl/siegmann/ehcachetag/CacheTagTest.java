@@ -253,6 +253,88 @@ public class CacheTagTest {
 		Assert.assertEquals("", testSubject.getModifiers());
 	}
 	
+
+//	@Test
+//	public void testDoBeforeLookup() throws Exception {
+//		// given
+//		String testInput = "A";
+//		
+//		CacheTagModifier modifierB = Mockito.mock(CacheTagModifier.class);
+//		Mockito.when(modifierB.beforeLookup(Mockito.any(CacheTag.class), Mockito.any(JspContext.class))).thenReturn("AB");
+//		Mockito.when(cacheTagModifierFactory.getCacheTagModifier("modifierB")).thenReturn(modifierB);
+//
+//		CacheTagModifier modifierC = Mockito.mock(CacheTagModifier.class);
+//		Mockito.when(modifierC.beforeUpdate(Mockito.any(CacheTag.class), Mockito.any(JspContext.class), Mockito.eq("AB"))).thenReturn("CAB");
+//		Mockito.when(cacheTagModifierFactory.getCacheTagModifier("modifierC")).thenReturn(modifierC);
+//
+//		testSubject.setModifiers("modifierB,modifierC");
+//		Mockito.when(pageContext.findAttribute(EHCacheTagConstants.MODIFIER_FACTORY_ATTRIBUTE)).thenReturn(cacheTagModifierFactory);
+//
+//		// when
+//		String actualResult = testSubject.doBeforeUpdate(testInput);
+//		
+//		// then
+//		Assert.assertEquals("CAB", actualResult);
+//		Mockito.verify(modifierB).beforeUpdate(Mockito.any(CacheTag.class), Mockito.any(JspContext.class), Mockito.eq("A"));
+//		Mockito.verify(modifierC).beforeUpdate(Mockito.any(CacheTag.class), Mockito.any(JspContext.class), Mockito.eq("AB"));
+//		Mockito.verifyNoMoreInteractions(modifierB, modifierC);
+//	}
+//
+
+	@Test
+	public void testDoBeforeUpdate() throws Exception {
+		// given
+		String testInput = "A";
+		
+		CacheTagModifier modifierB = Mockito.mock(CacheTagModifier.class);
+		Mockito.when(modifierB.beforeUpdate(Mockito.any(CacheTag.class), Mockito.any(JspContext.class), Mockito.eq("A"))).thenReturn("AB");
+		Mockito.when(cacheTagModifierFactory.getCacheTagModifier("modifierB")).thenReturn(modifierB);
+
+		CacheTagModifier modifierC = Mockito.mock(CacheTagModifier.class);
+		Mockito.when(modifierC.beforeUpdate(Mockito.any(CacheTag.class), Mockito.any(JspContext.class), Mockito.eq("AB"))).thenReturn("CAB");
+		Mockito.when(cacheTagModifierFactory.getCacheTagModifier("modifierC")).thenReturn(modifierC);
+
+		testSubject.setModifiers("modifierB,modifierC");
+		Mockito.when(pageContext.findAttribute(EHCacheTagConstants.MODIFIER_FACTORY_ATTRIBUTE)).thenReturn(cacheTagModifierFactory);
+
+		// when
+		String actualResult = testSubject.doBeforeUpdate(testInput);
+		
+		// then
+		Assert.assertEquals("CAB", actualResult);
+		Mockito.verify(modifierB).beforeUpdate(Mockito.any(CacheTag.class), Mockito.any(JspContext.class), Mockito.eq("A"));
+		Mockito.verify(modifierC).beforeUpdate(Mockito.any(CacheTag.class), Mockito.any(JspContext.class), Mockito.eq("AB"));
+
+		Mockito.verifyNoMoreInteractions(modifierB, modifierC);
+	}
+
+	@Test
+	public void testDoAfterRetrieval() throws Exception {
+		// given
+		String testInput = "A";
+		
+		CacheTagModifier modifierB = Mockito.mock(CacheTagModifier.class);
+		Mockito.when(modifierB.afterRetrieval(Mockito.any(CacheTag.class), Mockito.any(JspContext.class), Mockito.eq("A"))).thenReturn("AB");
+		Mockito.when(cacheTagModifierFactory.getCacheTagModifier("modifierB")).thenReturn(modifierB);
+
+		CacheTagModifier modifierC = Mockito.mock(CacheTagModifier.class);
+		Mockito.when(modifierC.afterRetrieval(Mockito.any(CacheTag.class), Mockito.any(JspContext.class), Mockito.eq("AB"))).thenReturn("CAB");
+		Mockito.when(cacheTagModifierFactory.getCacheTagModifier("modifierC")).thenReturn(modifierC);
+
+		testSubject.setModifiers("modifierB,modifierC");
+		Mockito.when(pageContext.findAttribute(EHCacheTagConstants.MODIFIER_FACTORY_ATTRIBUTE)).thenReturn(cacheTagModifierFactory);
+
+		// when
+		String actualResult = testSubject.doAfterRetrieval(testInput);
+		
+		// then
+		Assert.assertEquals("CAB", actualResult);
+		Mockito.verify(modifierB).afterRetrieval(Mockito.any(CacheTag.class), Mockito.any(JspContext.class), Mockito.eq("A"));
+		Mockito.verify(modifierC).afterRetrieval(Mockito.any(CacheTag.class), Mockito.any(JspContext.class), Mockito.eq("AB"));
+		Mockito.verifyNoMoreInteractions(modifierB, modifierC);
+	}
+	
+	
 	/**
 	 * There is no cache key.
 	 * 
