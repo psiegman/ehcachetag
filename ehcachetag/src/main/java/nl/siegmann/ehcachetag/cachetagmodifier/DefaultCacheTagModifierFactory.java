@@ -9,7 +9,7 @@ import javax.servlet.ServletContext;
 import nl.siegmann.ehcachetag.EHCacheTagConstants;
 import nl.siegmann.ehcachetag.util.BeanFactory;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
