@@ -32,9 +32,7 @@ work as posible is done in java code and web.xml configuration.
 In this example we add the end-user's locale to the cache key, so that the content is cached on a per locale-basis.
 
 #### Create an implementation of the CacheTagModifier interface
-This modifier updates the cache Key by combining the cacheKey from the tag with the 
-
-Locale from the pageContext request.
+This modifier updates the cache Key by combining the cacheKey from the tag with the Locale from the pageContext request.
 
 [CacheTagModifier.java @ github](https://github.com/psiegman/ehcachetag/blob/master/ehcachetag/src/main/java/nl/siegmann/ehcachetag/cachetagmodifier/CacheTagModifier.java)
 
