@@ -2,7 +2,7 @@ package nl.siegmann.ehcachetag.util;
 
 import java.util.Collection;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 public class StringUtil {
 
