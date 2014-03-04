@@ -659,6 +659,11 @@ public class CacheTagTest {
 		// Mockito.verifyNoMoreInteractions(pageContext);
 	}
 	
+
+	/**
+	 * Verify that the cacheTag is ready for use by another thread.
+     * Tag instances can be reused for another thread by the underlying jsp engine.
+     */
 	private void verifyCleanup() {
 		Assert.assertNull(testSubject.getKey());
 		Assert.assertNull(testSubject.getCache());

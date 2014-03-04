@@ -7,7 +7,7 @@ import javax.servlet.ServletContextListener;
 import nl.siegmann.ehcachetag.cachetagmodifier.CacheTagModifierFactory;
 import nl.siegmann.ehcachetag.cachetagmodifier.DefaultCacheTagModifierFactory;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
