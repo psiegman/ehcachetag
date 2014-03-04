@@ -34,11 +34,15 @@
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-log4j12</artifactId>
 			<version>${org.slf4j-version}</version>
+			<!-- Concrete logging provider left to application -->
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
 			<version>1.2.15</version>
+			<!-- Concrete logging provider left to application -->
+			<scope>test</scope>
 			<exclusions>
 				<exclusion>
 					<groupId>javax.mail</groupId>
@@ -76,6 +80,7 @@
 			<groupId>javax.servlet</groupId>
 			<artifactId>jstl</artifactId>
 			<version>1.2</version>
+			<scope>provided</scope>
 		</dependency>
 
 		<!-- Test -->
@@ -89,6 +94,7 @@
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-all</artifactId>
 			<version>1.9.0</version>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 	<build>
