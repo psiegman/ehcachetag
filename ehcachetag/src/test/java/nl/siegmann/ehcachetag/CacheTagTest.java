@@ -249,10 +249,7 @@ public class CacheTagTest {
 		// then
 		Assert.assertEquals(BodyTagSupport.EVAL_BODY_INCLUDE, actualResult);
 		
-		// cleanup
-		Assert.assertNull(testSubject.getKey());
-		Assert.assertNull(testSubject.getCache());
-		Assert.assertEquals("", testSubject.getModifiers());
+		verifyCleanup();
 	}
 	
 
