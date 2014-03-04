@@ -15,18 +15,30 @@ Simple test tag, stores the content with the key 'test'.
 
 
 ## Customizing the cache used
-By default ehcachetag uses a cache named ehcachtagCache.
+By default ehcachetag uses a cache named ehcachtagCache.  
 This can be changed in several ways.
 
 - You can use the cache attribute on the cachetag
 - You can add a modifier that updates the cache name (see "How to customize tag behaviour" for this)
 
-## How to customize the tag behaviour
-The behaviour of the cache tag can be changed using modifiers.  
-Modifiers are java classes that are called before doing a cache lookup, before a cache update and after cache retrieval.
+## How to customize the caching behaviour
+The cache key and the cached content can be modified before doing a cache lookup, before a cache update and after cache retrieval.  
+This way the caching behaviour can be changed from the defaults.  
 
-### Example Java source
-This modifier updates the cache Key by combining the cacheKey from the tag with the Locale from the pageContext request.
+The modifier system is set up in such a way that the changes in the jsp pages are as minimal as possible, and as much of the
+work as posible is done in java code and web.xml configuration.
+
+### Example: Locale-specific caching
+In this example we add the end-user's locale to the cache key, so that the content is cached on a per locale-basis.
+
+#### Create an implementation of the CacheTagModifier interface
+This modifier updates the cache Key by combining the cacheKey from the tag with the 
+
+Locale from the pageContext request.
+
+[CacheTagModifier.java @ github](https://github.com/psiegman/ehcachetag/blob/master/ehcachetag/src/main/java/nl/siegmann/ehcachetag/cachetagmodifier/CacheTagModifier.java)
+
+LocaleCacheTagModifier.java:
 
 	public class LocaleCacheTagModifier extends AbstractCacheTagModifier {
 	
@@ -38,8 +50,8 @@ This modifier updates the cache Key by combining the cacheKey from the tag with 
 		}
 	}
 
-### web.xml
-Add the modifier to the web.xml
+#### Add the modifier to the web.xml
+web.xml:
 
     <listener>
         <listener-class>
@@ -54,8 +66,8 @@ Add the modifier to the web.xml
 		</param-value>
 	</context-param>
 
-### JSP
-And finally, how to use it in a JSP page  
+#### Use the modifier in a JSP page  
+Example.jsp:
 
 	<%@ taglib prefix="ect" uri="http://www.siegmann.nl/ehcachetag/taglib" %>
 	
@@ -65,8 +77,11 @@ And finally, how to use it in a JSP page
 
 ## Customizing the CacheTagModifierFactory
 Modifiers are by default managed by the DefaultCacheTagModifierFactory.
+This ModifierFactory is a light-weight bean factory that enables you to run the ehcache tag system without Spring or any other bean factory.
 
-If you want a different implementation, for instance one where the Modifiers are managed by spring then you can configure this in the web.xml like this:  
+However, if you do want your cachetagmodifiers managed by Spring or another bean factory then this is possible as follows:
+1. Implement your own CacheTagModifierFactory.
+2. Configure this in the web.xml like this:  
 
 	<context-param>
 		<param-name>ehcachetag.cacheTageModifierFactory</param-name>
