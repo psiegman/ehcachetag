@@ -5,7 +5,7 @@ EHCache taglib is a taglib that provides a cache tag for jsp pages backed by ehc
 
 ## Basic example
 
-Simple test tag, stores the content with the key 'test'.
+Simple test tag, stores the content with the key 'test' in cache 'ehcachtagCache'.
 
 	<%@ taglib prefix="ect" uri="http://www.siegmann.nl/ehcachetag/taglib" %>
 	
@@ -32,9 +32,12 @@ work as posible is done in java code and web.xml configuration.
 In this example we add the end-user's locale to the cache key, so that the content is cached on a per locale-basis.
 
 #### Create an implementation of the CacheTagModifier interface
-This modifier updates the cache Key by combining the cacheKey from the tag with the Locale from the pageContext request.
+The LocaleCacheTagModifier implements the beforeLookup method.
+The beforeLookup method is called by the CacheTag before doing a lookup in the underlying caching system.
 
-[CacheTagModifier.java @ github](https://github.com/psiegman/ehcachetag/blob/master/ehcachetag/src/main/java/nl/siegmann/ehcachetag/cachetagmodifier/CacheTagModifier.java)
+The LocaleCacheTagModifier implementation of the beforeLookup method gets the Locale from the pageContext request and adds it to the cache key.
+
+See: [CacheTagModifier.java @ github](https://github.com/psiegman/ehcachetag/blob/master/ehcachetag/src/main/java/nl/siegmann/ehcachetag/cachetagmodifier/CacheTagModifier.java)
 
 LocaleCacheTagModifier.java:
 
@@ -49,6 +52,8 @@ LocaleCacheTagModifier.java:
 	}
 
 #### Add the modifier to the web.xml
+Because this is the first CacheTagModifier in this project we need to add an extra ContextListener to the web.xml.
+
 web.xml:
 
     <listener>
@@ -56,6 +61,11 @@ web.xml:
 			nl.siegmann.ehcachetag.EHCacheTagServletContextListener
         </listener-class>
     </listener>
+
+Next we add the LocaleCacheTagModifier to the config under the name of 'locale'.
+This way we can refer to the modifier by its name 'locale' in the jsp:
+
+web.xml:
 
 	<context-param>
 		<param-name>ehcachetag.cacheTageModifierFactoryConfig</param-name>
@@ -65,6 +75,8 @@ web.xml:
 	</context-param>
 
 #### Use the modifier in a JSP page  
+Here we use the LocaleCacheTagModifier.
+
 Example.jsp:
 
 	<%@ taglib prefix="ect" uri="http://www.siegmann.nl/ehcachetag/taglib" %>
