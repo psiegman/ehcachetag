@@ -67,12 +67,12 @@ public class DefaultCacheTagModifierFactory implements CacheTagModifierFactory {
 	}
 
 	@Override
-	public CacheTagModifier getCacheTagModifier(String cacheTagInterceptorName) {
-		if (StringUtils.isBlank(cacheTagInterceptorName) || DEFAULT_CACHETAG_MODIFIER_NAME.equals(cacheTagInterceptorName)) {
+	public CacheTagModifier getCacheTagModifier(String cacheTagModifierName) {
+		if (StringUtils.isBlank(cacheTagModifierName) || DEFAULT_CACHETAG_MODIFIER_NAME.equals(cacheTagModifierName)) {
 			return defaultCacheTagModifier;
 		}
 		
-		return cacheTagModifiers.get(cacheTagInterceptorName);
+		return cacheTagModifiers.get(cacheTagModifierName);
 	}
 
 	@Override

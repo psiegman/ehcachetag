@@ -33,7 +33,7 @@ public interface CacheTagModifierFactory {
 	 * 
 	 * @return the CacheTagModifier with the given name, null if not found.
 	 */
-	CacheTagModifier getCacheTagModifier(String cacheTagInterceptorName);
+	CacheTagModifier getCacheTagModifier(String cacheTagModifierName);
 
 	/**
 	 * Called once on application destroy.
