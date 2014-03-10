@@ -17,5 +17,6 @@
   <modules>
     <module>../ehcachetag</module>
     <module>../ehcachetag-demo</module>
+    <module>../ehcachetag-spring</module>
   </modules>
 </project>
