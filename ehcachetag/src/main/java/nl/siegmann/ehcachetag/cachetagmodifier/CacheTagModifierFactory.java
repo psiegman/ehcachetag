@@ -5,7 +5,7 @@ import java.util.Collection;
 import javax.servlet.ServletContext;
 
 /**
- * Central location for managing CacheTagPreProcessors.
+ * Central location for managing CacheTagModifiers.
  * 
  * @author paul
  *

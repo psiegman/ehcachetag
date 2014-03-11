@@ -9,6 +9,13 @@ import javax.servlet.ServletContext;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
+
+/**
+ * Loads CacheTagModifiers from the Spring context.
+ * 
+ * @author paul
+ *
+ */
 public class SpringCacheTagModifierFactory implements CacheTagModifierFactory {
 
 	private Map<String, CacheTagModifier> cacheTagModifiers = Collections.emptyMap();

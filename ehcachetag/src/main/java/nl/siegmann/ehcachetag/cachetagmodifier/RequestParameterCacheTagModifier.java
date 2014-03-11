@@ -8,6 +8,9 @@ import nl.siegmann.ehcachetag.CacheTag;
 /**
  * Uses the value of the request parameter identified by the parameter property to create the cacheKey.
  * 
+ * Potentially dangerous because an attacker can generate a lot of requests
+ * with different parameter values thus ensuring a lot of cache churn.
+ * 
  * @author paul
  *
  */
