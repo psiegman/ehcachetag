@@ -1,7 +1,7 @@
 # EHCache Taglib
 ## Introduction
 
-EHCache taglib is a taglib that provides a cache tag for jsp pages backed by ehcache.
+The EHCache taglib provides a jsp tag that caches jsp fragments backed by ehcache.
 
 ## Basic example
 
@@ -108,3 +108,6 @@ However, if you do want your cachetagmodifiers managed by Spring or another bean
 
 ## Customizing the default cache behaviour
 If you add a Modifier with the name 'default' to the DefaultCacheTagModifierFactory config, then it will be used by default for every cache tag use.
+
+## References
+[EHCache](http://ehcache.org/)
