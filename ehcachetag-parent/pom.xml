@@ -14,8 +14,9 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
-	<modules>
+  <modules>
     <module>../ehcachetag</module>
     <module>../ehcachetag-demo</module>
+    <module>../ehcachetag-spring</module>
   </modules>
 </project>

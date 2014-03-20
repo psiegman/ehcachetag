@@ -1,11 +1,11 @@
 # EHCache Taglib
 ## Introduction
 
-EHCache taglib is a taglib that provides a cache tag for jsp pages backed by ehcache.
+The EHCache taglib provides a jsp tag that caches jsp fragments backed by ehcache.
 
 ## Basic example
 
-Simple test tag, stores the content with the key 'test'.
+Simple test tag, stores the content with the key 'test' in cache 'ehcachtagCache'.
 
 	<%@ taglib prefix="ect" uri="http://www.siegmann.nl/ehcachetag/taglib" %>
 	
@@ -22,8 +22,13 @@ This can be changed in several ways.
 - You can add a modifier that updates the cache name (see "How to customize tag behaviour" for this)
 
 ## How to customize the caching behaviour
-The cache key and the cached content can be modified before doing a cache lookup, before a cache update and after cache retrieval.  
-This way the caching behaviour can be changed from the defaults.  
+Caching behaviour can be modified by using CacheTagModifiers.
+
+CacheTagModifiers are called by the CacheTag before doing a cache lookup, before a cache update and after cache retrieval.  
+See: [CacheTagModifier.java @ github](https://github.com/psiegman/ehcachetag/blob/master/ehcachetag/src/main/java/nl/siegmann/ehcachetag/cachetagmodifier/CacheTagModifier.java)
+
+This way the caching behaviour like the cache key, the cached content, the cache used, etc can be modified.
+EHCacheTag comes with a minimal beanfactory built-in to manage the CacheTagModifiers, but there is also the ehcache-spring module where the CacheTagModifiers can be managed by the Spring Framework.
 
 The modifier system is set up in such a way that the changes in the jsp pages are as minimal as possible, and as much of the
 work as posible is done in java code and web.xml configuration.
@@ -32,9 +37,11 @@ work as posible is done in java code and web.xml configuration.
 In this example we add the end-user's locale to the cache key, so that the content is cached on a per locale-basis.
 
 #### Create an implementation of the CacheTagModifier interface
-This modifier updates the cache Key by combining the cacheKey from the tag with the Locale from the pageContext request.
+The LocaleCacheTagModifier implements the beforeLookup method.
+The beforeLookup method is called by the CacheTag before doing a lookup in the underlying caching system.
 
-[CacheTagModifier.java @ github](https://github.com/psiegman/ehcachetag/blob/master/ehcachetag/src/main/java/nl/siegmann/ehcachetag/cachetagmodifier/CacheTagModifier.java)
+The LocaleCacheTagModifier implementation of the beforeLookup method gets the Locale from the pageContext request and adds it to the cache key.
+
 
 LocaleCacheTagModifier.java:
 
@@ -49,6 +56,8 @@ LocaleCacheTagModifier.java:
 	}
 
 #### Add the modifier to the web.xml
+Because this is the first CacheTagModifier in this project we need to add an extra ContextListener to the web.xml.
+
 web.xml:
 
     <listener>
@@ -56,6 +65,11 @@ web.xml:
 			nl.siegmann.ehcachetag.EHCacheTagServletContextListener
         </listener-class>
     </listener>
+
+Next we add the LocaleCacheTagModifier to the config under the name of 'locale'.
+This way we can refer to the modifier by its name 'locale' in the jsp:
+
+web.xml:
 
 	<context-param>
 		<param-name>ehcachetag.cacheTageModifierFactoryConfig</param-name>
@@ -65,6 +79,8 @@ web.xml:
 	</context-param>
 
 #### Use the modifier in a JSP page  
+Here we use the LocaleCacheTagModifier.
+
 Example.jsp:
 
 	<%@ taglib prefix="ect" uri="http://www.siegmann.nl/ehcachetag/taglib" %>
@@ -78,15 +94,20 @@ Modifiers are by default managed by the DefaultCacheTagModifierFactory.
 This ModifierFactory is a light-weight bean factory that enables you to run the ehcache tag system without Spring or any other bean factory.
 
 However, if you do want your cachetagmodifiers managed by Spring or another bean factory then this is possible as follows:
+
 1. Implement your own CacheTagModifierFactory.
 2. Configure this in the web.xml like this:  
 
-	<context-param>
-		<param-name>ehcachetag.cacheTageModifierFactory</param-name>
-		<param-value>
-			nl.siegmann.ehcachetag.cachetagmodifier.DefaultCacheTagModifierFactory
-		</param-value>
-	</context-param>
+
+		<context-param>
+			<param-name>ehcachetag.cacheTageModifierFactory</param-name>
+			<param-value>
+				nl.siegmann.ehcachetag.cachetagmodifier.DefaultCacheTagModifierFactory
+			</param-value>
+		</context-param>
 
 ## Customizing the default cache behaviour
 If you add a Modifier with the name 'default' to the DefaultCacheTagModifierFactory config, then it will be used by default for every cache tag use.
+
+## References
+[EHCache](http://ehcache.org/)
