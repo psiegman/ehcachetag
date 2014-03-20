@@ -6,12 +6,15 @@ import javax.servlet.jsp.JspContext;
 import nl.siegmann.ehcachetag.CacheTag;
 
 /**
- * Is called after the attributes are set and before the Cache lookup.
+ * This class is called before a lookup in the cache is done, after content is retreived from the cache and before
+ * content is written to the outputstream.
  * 
- * Useful for for instance adding additional data to the cache key.
- * 
- * Thread-safety: This class can and will be used by several concurrent threads.
- * Init and destroy will be called only once by the application server, but make sure doPreProcess is thread-safe.
+ * It gives the ability to modify the cache key, the cache to use, the content to store, the content to display and other
+ * aspects of the caching lifecycle.
+ * <p/>
+ * Thread-safety: This class can and will be used by several concurrent threads.<br/>
+ * Init and destroy will be called only once by the application server, but make sure any implementation
+ * of this interface is thread-safe.
  * 
  * @author paul
  *
@@ -70,7 +73,7 @@ public interface CacheTagModifier {
 	 * @param cacheTag
 	 * @param jspContext
 	 * @param content the content that will be stored in the cache
-	 * @return
+	 * @return the content to store in the cache.
 	 */
 	String beforeUpdate(CacheTag cacheTag, JspContext jspContext, String content);
 	
@@ -80,8 +83,8 @@ public interface CacheTagModifier {
 	 * 
 	 * @param cacheTag
 	 * @param jspContext
-	 * @param content the content that will be sent back to the response
-	 * @return
+	 * @param content the content that will be sent back to the client
+	 * @return The content to send back to the client
 	 */
 	String afterRetrieval(CacheTag cacheTag, JspContext jspContext, String content);
 
