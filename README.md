@@ -1,11 +1,13 @@
 # EHCache Taglib
 ## Introduction
 
-The EHCache taglib provides a jsp tag that caches jsp fragments backed by ehcache.
+EHCacheTag is a taglib that caches fragments of a jsp page.  
+It uses ehcache for the actual caching.
 
 ## Basic example
 
-Simple test tag, stores the content with the key 'test' in cache 'ehcachtagCache'.
+Here is a basic example fragment.  
+The content is stored with the key 'test' in the cache 'ehcachtagCache'.
 
 	<%@ taglib prefix="ect" uri="http://www.siegmann.nl/ehcachetag/taglib" %>
 	
@@ -15,11 +17,11 @@ Simple test tag, stores the content with the key 'test' in cache 'ehcachtagCache
 
 
 ## Customizing the cache used
-By default ehcachetag uses a cache named ehcachtagCache.  
-This can be changed in several ways.
+By default ehcachetag uses a cache named ehcachtagCache.    
+This can simply be changed by using the cache attribute on the cachetag
 
-- You can use the cache attribute on the cachetag
-- You can add a modifier that updates the cache name (see "How to customize tag behaviour" for this)
+
+More complex customization can done using the CacheTagModifiers
 
 ## How to customize the caching behaviour
 Caching behaviour can be modified by using CacheTagModifiers.
