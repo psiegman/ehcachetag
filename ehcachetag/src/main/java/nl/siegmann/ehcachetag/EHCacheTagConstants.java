@@ -18,7 +18,14 @@ public class EHCacheTagConstants {
 	public static final String MODIFIER_FACTORY_ATTRIBUTE = "ehcachetag.cacheTagModifierFactory";
 
 	/**
+	 * The web.xml config parameter that defines which CacheManager to use
+	 * If not defined, use default CacheManager
+	 */
+	public static final String CACHE_MANAGER_NAME_PARAM = "ehcachetag.cacheManagerName";
+	
+	/**
 	 * The name of the default cache.
 	 */
 	public static final String DEFAULT_CACHE_NAME = "ehcachetagCache";
+	
 }

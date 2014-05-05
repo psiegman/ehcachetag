@@ -42,6 +42,7 @@ public class CacheTag extends BodyTagSupport {
 	private Object key;
 	private String cacheName = EHCacheTagConstants.DEFAULT_CACHE_NAME;
 	private String[] modifiers = NO_MODIFIERS;
+	private CacheManager cacheManager;
 
 	/**
 	 * Writes the content of the body to the pageContext writer.
@@ -352,8 +353,28 @@ public class CacheTag extends BodyTagSupport {
 		return result.toString();
 	}
 	
+	/**
+	 * get the default CacheManager or the one defined by @Link EHCacheTagConstants.CACHE_MANAGER_NAME_PARAM
+	 * @return
+	 */
 	CacheManager getCacheManager() {
-		return CacheManager.getInstance();
+		if (cacheManager == null) {
+			String cacheManagerName = getCacheManagerName();
+			if (StringUtils.isNotBlank(cacheManagerName)) {
+				cacheManager = CacheManager.getCacheManager(cacheManagerName);
+				if (cacheManager == null) {
+					LOG.warn("failed to load cache manager " + cacheManagerName + ", loading default cache manager instead");
+					cacheManager = CacheManager.getInstance();
+				}
+			} else {
+				cacheManager = CacheManager.getInstance();
+			}
+		}
+		return cacheManager;
+	}
+
+	private String getCacheManagerName() {
+		return pageContext.getServletContext().getInitParameter(EHCacheTagConstants.CACHE_MANAGER_NAME_PARAM);
 	}
 	
 	public Object getKey() {
