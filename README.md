@@ -110,6 +110,14 @@ However, if you do want your cachetagmodifiers managed by Spring or another bean
 
 ## Customizing the default cache behaviour
 If you add a Modifier with the name 'default' to the DefaultCacheTagModifierFactory config, then it will be used by default for every cache tag use.
+## Customizing the cache manager
+When you don't want to use the default cache manager that CacheManager.getInstance() provides, you can add a parameter in web.xml:
 
+	<context-param>
+		<param-name>ehcachetag.cacheManagerName</param-name>
+		<param-value>lolCatEhCache</param-value>
+	</context-param>
+	
+ 
 ## References
 [EHCache](http://ehcache.org/)

@@ -689,4 +689,37 @@ public class CacheTagTest {
 		Assert.assertNotNull(testSubject.getModifiers());
 		Assert.assertEquals("a,b", testSubject.getModifiers());
 	}
+	
+	@Test
+	public void getDefaultCacheManager() {
+		/*reset method because we are testing that now */	
+		Mockito.when(testSubject.getCacheManager()).thenCallRealMethod();
+		
+		final ServletContext servletContext = Mockito.mock(ServletContext.class);
+		Mockito.when(pageContext.getServletContext()).thenReturn(servletContext);
+		Mockito.when(
+			servletContext.getInitParameter(EHCacheTagConstants.CACHE_MANAGER_NAME_PARAM)
+		).thenReturn(null);
+		
+		Assert.assertEquals(CacheManager.getInstance(), testSubject.getCacheManager());
+	}
+	/*
+	@Test
+	public void getCacheManagerFromConfig() {
+		Mockito.when(testSubject.getCacheManager()).thenCallRealMethod();
+		
+		final ServletContext servletContext = Mockito.mock(ServletContext.class);
+	
+		final String cacheName = "myEhCache";
+		Mockito.when(
+			servletContext.getInitParameter(EHCacheTagConstants.CACHE_MANAGER_NAME_PARAM)
+		).thenReturn(cacheName);
+
+		Assert.assertNotEquals(CacheManager.getInstance(), testSubject.getCacheManager());
+
+		final CacheManager myCacheManager = Mockito.mock(CacheManager.class);
+		Mockito.when(CacheManager.getCacheManager(cacheName)).thenReturn(myCacheManager);
+		
+		Assert.assertEquals(myCacheManager, testSubject.getCacheManager());
+	}*/
 }
