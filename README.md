@@ -9,12 +9,13 @@ It uses ehcache for the actual caching.
 Here is a basic example fragment.  
 The content is stored with the key 'test' in the cache 'ehcachtagCache'.
 
-	<%@ taglib prefix="ect" uri="http://www.siegmann.nl/ehcachetag/taglib" %>
-	
-	<ect:cache key="test">
-		Content generated on <fmt:formatDate pattern="yyyy-MM-dd HH:mm:ss.SSS" value="${now}"/>
-	</ect:cache>
+```jsp
+<%@ taglib prefix="ect" uri="http://www.siegmann.nl/ehcachetag/taglib" %>
 
+<ect:cache key="test">
+	Content generated on <fmt:formatDate pattern="yyyy-MM-dd HH:mm:ss.SSS" value="${now}"/>
+</ect:cache>
+```
 
 ## Customizing the cache used
 By default ehcachetag uses a cache named ehcachtagCache.    
@@ -47,49 +48,57 @@ The LocaleCacheTagModifier implementation of the beforeLookup method gets the Lo
 
 LocaleCacheTagModifier.java:
 
-	public class LocaleCacheTagModifier extends AbstractCacheTagModifier {
-	
-		@Override
-		public void beforeLookup(CacheTag cacheTag, PageContext pageContext) {
-			Locale locale = ((HttpServletRequest) pageContext.getRequest()).getLocale();
-			Object cacheKey = new CompositeCacheKey(cacheTag.getKey(), locale);
-			cacheTag.setKey(cacheKey);
-		}
+```java
+public class LocaleCacheTagModifier extends AbstractCacheTagModifier {
+
+	@Override
+	public void beforeLookup(CacheTag cacheTag, PageContext pageContext) {
+		Locale locale = ((HttpServletRequest) pageContext.getRequest()).getLocale();
+		Object cacheKey = new CompositeCacheKey(cacheTag.getKey(), locale);
+		cacheTag.setKey(cacheKey);
 	}
+}
+```
 
 #### Add the modifier to the web.xml
 Because this is the first CacheTagModifier in this project we need to add an extra ContextListener to the web.xml.
 
 web.xml:
 
-    <listener>
-        <listener-class>
-			nl.siegmann.ehcachetag.EHCacheTagServletContextListener
-        </listener-class>
-    </listener>
+```xml
+<listener>
+    <listener-class>
+		nl.siegmann.ehcachetag.EHCacheTagServletContextListener
+    </listener-class>
+</listener>
+```
 
 Next we add the LocaleCacheTagModifier to the config under the name of 'locale'.
 This way we can refer to the modifier by its name 'locale' in the jsp:
 
 web.xml:
 
-	<context-param>
-		<param-name>ehcachetag.cacheTageModifierFactoryConfig</param-name>
-		<param-value>
-		locale=nl.siegmann.ehcachetag.cachetagmodifier.LocaleCacheTagModifier
-		</param-value>
-	</context-param>
+```xml
+<context-param>
+	<param-name>ehcachetag.cacheTageModifierFactoryConfig</param-name>
+	<param-value>
+	locale=nl.siegmann.ehcachetag.cachetagmodifier.LocaleCacheTagModifier
+	</param-value>
+</context-param>
+```
 
 #### Use the modifier in a JSP page  
 Here we use the LocaleCacheTagModifier.
 
 Example.jsp:
 
-	<%@ taglib prefix="ect" uri="http://www.siegmann.nl/ehcachetag/taglib" %>
-	
-	<ect:cache key="test" modifiers="locale">
-		Content generated on <fmt:formatDate pattern="yyyy-MM-dd HH:mm:ss.SSS" value="${now}"/>
-	</ect:cache>
+```jsp
+<%@ taglib prefix="ect" uri="http://www.siegmann.nl/ehcachetag/taglib" %>
+
+<ect:cache key="test" modifiers="locale">
+	Content generated on <fmt:formatDate pattern="yyyy-MM-dd HH:mm:ss.SSS" value="${now}"/>
+</ect:cache>
+```
 
 ## Customizing the CacheTagModifierFactory
 Modifiers are by default managed by the DefaultCacheTagModifierFactory.
@@ -100,24 +109,26 @@ However, if you do want your cachetagmodifiers managed by Spring or another bean
 1. Implement your own CacheTagModifierFactory.
 2. Configure this in the web.xml like this:  
 
-
-		<context-param>
-			<param-name>ehcachetag.cacheTageModifierFactory</param-name>
-			<param-value>
-				nl.siegmann.ehcachetag.cachetagmodifier.DefaultCacheTagModifierFactory
-			</param-value>
-		</context-param>
+```xml
+<context-param>
+	<param-name>ehcachetag.cacheTageModifierFactory</param-name>
+	<param-value>
+		nl.siegmann.ehcachetag.cachetagmodifier.DefaultCacheTagModifierFactory
+	</param-value>
+</context-param>
+```
 
 ## Customizing the default cache behaviour
 If you add a Modifier with the name 'default' to the DefaultCacheTagModifierFactory config, then it will be used by default for every cache tag use.
 ## Customizing the cache manager
 When you don't want to use the default cache manager that CacheManager.getInstance() provides, you can add a parameter in web.xml:
 
-	<context-param>
-		<param-name>ehcachetag.cacheManagerName</param-name>
-		<param-value>lolCatEhCache</param-value>
-	</context-param>
-	
+```xml
+<context-param>
+	<param-name>ehcachetag.cacheManagerName</param-name>
+	<param-value>lolCatEhCache</param-value>
+</context-param>
+```
  
 ## References
 [EHCache](http://ehcache.org/)
