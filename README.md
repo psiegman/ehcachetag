@@ -126,7 +126,7 @@ When you don't want to use the default cache manager that CacheManager.getInstan
 ```xml
 <context-param>
 	<param-name>ehcachetag.cacheManagerName</param-name>
-	<param-value>lolCatEhCache</param-value>
+	<param-value>myCacheManager</param-value>
 </context-param>
 ```
  
