@@ -354,8 +354,8 @@ public class CacheTag extends BodyTagSupport {
 	}
 	
 	/**
-	 * get the default CacheManager or the one defined by @Link EHCacheTagConstants.CACHE_MANAGER_NAME_PARAM
-	 * @return
+	 * Get the default CacheManager or the one defined by {@link EHCacheTagConstants#CACHE_MANAGER_NAME_PARAM}
+	 * @return the default CacheManager or the one defined by {@link EHCacheTagConstants#CACHE_MANAGER_NAME_PARAM}
 	 */
 	CacheManager getCacheManager() {
 		if (cacheManager == null) {
@@ -373,6 +373,11 @@ public class CacheTag extends BodyTagSupport {
 		return cacheManager;
 	}
 
+	/**
+	 * Gets the name of the cachemanager from the servletcontext.
+	 * 
+	 * @return the name of the cachemanager from the servletcontext.
+	 */
 	private String getCacheManagerName() {
 		return pageContext.getServletContext().getInitParameter(EHCacheTagConstants.CACHE_MANAGER_NAME_PARAM);
 	}
