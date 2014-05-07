@@ -673,9 +673,6 @@ public class CacheTagTest {
      * Tag instances can be reused for another thread by the underlying jsp engine.
      */
 	private void verifyCleanup() {
-//		Assert.assertNull(testSubject.getKey());
-//		Assert.assertNull(testSubject.getCache());
-//		Assert.assertEquals("", testSubject.getModifiers());
 		Mockito.verify(testSubject).cleanup();
 	}
 	
@@ -760,37 +757,4 @@ public class CacheTagTest {
 
 		Assert.assertTrue(actualCacheManager == customCacheManager);
 	}
-	
-	//	@Test
-//	public void getDefaultCacheManager() {
-//		// reset method because we are testing that now */	
-//		Mockito.when(testSubject.getCacheManager()).thenCallRealMethod();
-//		
-//		final ServletContext servletContext = Mockito.mock(ServletContext.class);
-//		Mockito.when(pageContext.getServletContext()).thenReturn(servletContext);
-//		Mockito.when(
-//			servletContext.getInitParameter(EHCacheTagConstants.CACHE_MANAGER_NAME_PARAM)
-//		).thenReturn(null);
-//		
-//		Assert.assertEquals(CacheManager.getInstance(), testSubject.getCacheManager());
-//	}
-//
-//	@Test
-//	public void getCacheManagerFromConfig() {
-//		Mockito.when(testSubject.getCacheManager()).thenCallRealMethod();
-//		
-//		final ServletContext servletContext = Mockito.mock(ServletContext.class);
-//	
-//		final String cacheName = "myEhCache";
-//		Mockito.when(
-//			servletContext.getInitParameter(EHCacheTagConstants.CACHE_MANAGER_NAME_PARAM)
-//		).thenReturn(cacheName);
-//
-//		Assert.assertNotEquals(CacheManager.getInstance(), testSubject.getCacheManager());
-//
-//		final CacheManager myCacheManager = Mockito.mock(CacheManager.class);
-//		Mockito.when(CacheManager.getCacheManager(cacheName)).thenReturn(myCacheManager);
-//		
-//		Assert.assertEquals(myCacheManager, testSubject.getCacheManager());
-//	}
 }
