@@ -30,6 +30,9 @@ public class CacheTagTest {
 	private PageContext pageContext;
 	
 	@Mock
+	private ServletContext servletContext;
+
+	@Mock
 	private JspWriter jspWriter = Mockito.mock(JspWriter.class);
 
 	@Mock
@@ -41,6 +44,9 @@ public class CacheTagTest {
 	@Mock
 	private CacheManager cacheManager;
 
+	@Mock
+	private CacheManager customCacheManager;
+	
 	@Mock
 	private BodyContent bodyContent;
 
@@ -57,7 +63,8 @@ public class CacheTagTest {
 		testSubject.setBodyContent(bodyContent);
 		Mockito.when(pageContext.getOut()).thenReturn(jspWriter);
 		Mockito.when(pageContext.getPage()).thenReturn(this);
-		Mockito.doReturn(cacheManager).when(testSubject).getCacheManager();
+		Mockito.when(testSubject.getDefaultCacheManager()).thenReturn(cacheManager);
+		Mockito.when(pageContext.getServletContext()).thenReturn(servletContext);
 	}
 
 	/**
@@ -79,6 +86,7 @@ public class CacheTagTest {
 
 		// verify cleanup
 		Assert.assertNull(testSubject.getCache());
+		verifyCleanup();
 	}
 	
 	/**
@@ -665,9 +673,10 @@ public class CacheTagTest {
      * Tag instances can be reused for another thread by the underlying jsp engine.
      */
 	private void verifyCleanup() {
-		Assert.assertNull(testSubject.getKey());
-		Assert.assertNull(testSubject.getCache());
-		Assert.assertEquals("", testSubject.getModifiers());
+//		Assert.assertNull(testSubject.getKey());
+//		Assert.assertNull(testSubject.getCache());
+//		Assert.assertEquals("", testSubject.getModifiers());
+		Mockito.verify(testSubject).cleanup();
 	}
 	
 	@Test
@@ -691,35 +700,97 @@ public class CacheTagTest {
 	}
 	
 	@Test
-	public void getDefaultCacheManager() {
-		/*reset method because we are testing that now */	
-		Mockito.when(testSubject.getCacheManager()).thenCallRealMethod();
+	public void getCacheManager_defaults() {
+		// given
+		Mockito.when(servletContext.getInitParameter(EHCacheTagConstants.CACHE_MANAGER_NAME_PARAM)).thenReturn(null);
+
+		// when
+		CacheManager actualCacheManager = testSubject.getCacheManager();
 		
-		final ServletContext servletContext = Mockito.mock(ServletContext.class);
-		Mockito.when(pageContext.getServletContext()).thenReturn(servletContext);
-		Mockito.when(
-			servletContext.getInitParameter(EHCacheTagConstants.CACHE_MANAGER_NAME_PARAM)
-		).thenReturn(null);
-		
-		Assert.assertEquals(CacheManager.getInstance(), testSubject.getCacheManager());
+		// then
+		Mockito.verify(testSubject).getDefaultCacheManager();
+		Mockito.verify(testSubject, Mockito.never()).getCacheManager(Mockito.anyString());
+
+		Assert.assertTrue(actualCacheManager == cacheManager);
 	}
-	/*
+
 	@Test
-	public void getCacheManagerFromConfig() {
-		Mockito.when(testSubject.getCacheManager()).thenCallRealMethod();
+	public void getCacheManager_non_existing_cacheManager() {
+		// given
+		Mockito.when(servletContext.getInitParameter(EHCacheTagConstants.CACHE_MANAGER_NAME_PARAM)).thenReturn("foo");
+		Mockito.when(testSubject.getCacheManager("foo")).thenReturn(null);
 		
-		final ServletContext servletContext = Mockito.mock(ServletContext.class);
+		// when
+		CacheManager actualCacheManager = testSubject.getCacheManager();
+		
+		// then
+		Mockito.verify(testSubject).getDefaultCacheManager();
+		Mockito.verify(testSubject).getCacheManager("foo");
+
+		Assert.assertTrue(actualCacheManager == cacheManager);
+	}
+
+	@Test
+	public void getCacheManager_blank_string_cacheManager() {
+		// given
+		Mockito.when(servletContext.getInitParameter(EHCacheTagConstants.CACHE_MANAGER_NAME_PARAM)).thenReturn(" ");
+		
+		// when
+		CacheManager actualCacheManager = testSubject.getCacheManager();
+		
+		// then
+		Mockito.verify(testSubject).getDefaultCacheManager();
+		Mockito.verify(testSubject, Mockito.never()).getCacheManager(Mockito.anyString());
+
+		Assert.assertTrue(actualCacheManager == cacheManager);
+	}
 	
-		final String cacheName = "myEhCache";
-		Mockito.when(
-			servletContext.getInitParameter(EHCacheTagConstants.CACHE_MANAGER_NAME_PARAM)
-		).thenReturn(cacheName);
-
-		Assert.assertNotEquals(CacheManager.getInstance(), testSubject.getCacheManager());
-
-		final CacheManager myCacheManager = Mockito.mock(CacheManager.class);
-		Mockito.when(CacheManager.getCacheManager(cacheName)).thenReturn(myCacheManager);
+	@Test
+	public void getCacheManager_custom_cacheManager() {
+		// given
+		Mockito.when(servletContext.getInitParameter(EHCacheTagConstants.CACHE_MANAGER_NAME_PARAM)).thenReturn("custom");
+		Mockito.when(testSubject.getCacheManager("custom")).thenReturn(customCacheManager);
 		
-		Assert.assertEquals(myCacheManager, testSubject.getCacheManager());
-	}*/
+		// when
+		CacheManager actualCacheManager = testSubject.getCacheManager();
+		
+		// then
+		Mockito.verify(testSubject).getCacheManager("custom");
+		Mockito.verify(testSubject, Mockito.never()).getDefaultCacheManager();
+
+		Assert.assertTrue(actualCacheManager == customCacheManager);
+	}
+	
+	//	@Test
+//	public void getDefaultCacheManager() {
+//		// reset method because we are testing that now */	
+//		Mockito.when(testSubject.getCacheManager()).thenCallRealMethod();
+//		
+//		final ServletContext servletContext = Mockito.mock(ServletContext.class);
+//		Mockito.when(pageContext.getServletContext()).thenReturn(servletContext);
+//		Mockito.when(
+//			servletContext.getInitParameter(EHCacheTagConstants.CACHE_MANAGER_NAME_PARAM)
+//		).thenReturn(null);
+//		
+//		Assert.assertEquals(CacheManager.getInstance(), testSubject.getCacheManager());
+//	}
+//
+//	@Test
+//	public void getCacheManagerFromConfig() {
+//		Mockito.when(testSubject.getCacheManager()).thenCallRealMethod();
+//		
+//		final ServletContext servletContext = Mockito.mock(ServletContext.class);
+//	
+//		final String cacheName = "myEhCache";
+//		Mockito.when(
+//			servletContext.getInitParameter(EHCacheTagConstants.CACHE_MANAGER_NAME_PARAM)
+//		).thenReturn(cacheName);
+//
+//		Assert.assertNotEquals(CacheManager.getInstance(), testSubject.getCacheManager());
+//
+//		final CacheManager myCacheManager = Mockito.mock(CacheManager.class);
+//		Mockito.when(CacheManager.getCacheManager(cacheName)).thenReturn(myCacheManager);
+//		
+//		Assert.assertEquals(myCacheManager, testSubject.getCacheManager());
+//	}
 }

@@ -300,16 +300,14 @@ public class CacheTag extends BodyTagSupport {
 		} finally {
 			cleanup();
 		}
-		
-		cleanup();
-		
+				
 		return result;
 	}
 
 	/**
 	 * Cleanup for the next use of the tag
 	 */
-	private void cleanup() {
+	void cleanup() {
 		key = null;
 		cacheName = null;
 		modifiers = NO_MODIFIERS;
@@ -361,18 +359,27 @@ public class CacheTag extends BodyTagSupport {
 		if (cacheManager == null) {
 			String cacheManagerName = getCacheManagerName();
 			if (StringUtils.isNotBlank(cacheManagerName)) {
-				cacheManager = CacheManager.getCacheManager(cacheManagerName);
+				cacheManager = getCacheManager(cacheManagerName);
 				if (cacheManager == null) {
-					LOG.warn("failed to load cache manager " + cacheManagerName + ", loading default cache manager instead");
-					cacheManager = CacheManager.getInstance();
+					LOG.warn("failed to load cache manager " + cacheManagerName + ", loading default cachemanager instead");
+					cacheManager = getDefaultCacheManager();
 				}
 			} else {
-				cacheManager = CacheManager.getInstance();
+				cacheManager = getDefaultCacheManager();
 			}
 		}
 		return cacheManager;
 	}
 
+	
+	CacheManager getCacheManager(String cacheManagerName) {
+		return CacheManager.getCacheManager(cacheManagerName);
+	}
+	
+	CacheManager getDefaultCacheManager() {
+		return CacheManager.getInstance();
+	}
+	
 	/**
 	 * Gets the name of the cachemanager from the servletcontext.
 	 * 
