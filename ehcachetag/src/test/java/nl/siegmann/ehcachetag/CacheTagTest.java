@@ -3,6 +3,8 @@ package nl.siegmann.ehcachetag;
 import java.io.IOException;
 
 import javax.servlet.ServletContext;
+import javax.servlet.ServletRequest;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.JspContext;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspWriter;
@@ -214,6 +216,91 @@ public class CacheTagTest {
 		Assert.assertEquals(BodyTagSupport.EVAL_BODY_INCLUDE, startTagReturn);
 		// XXX Mockito.verifyNoMoreInteractions(jspWriter, pageContext);
 	}
+
+	/**
+	 * Test the case where the before cache lookup causes an exception.
+	 * @throws Exception 
+	 */
+	@Test
+	public void doStartTag_before_lookup_excepion() throws Exception {
+		// given
+		Mockito.doThrow(new Exception()).when(testSubject).doBeforeLookup();
+		
+		// when
+		int startTagReturn = testSubject.doStartTag();
+		
+		// then
+		Assert.assertEquals(1, startTagReturn);
+		verifyCleanup();
+	}
+	
+	
+	/**
+	 * Test the behaviour when writing the result to the outputstream causes an IOException.
+	 * @throws IOException 
+	 * @throws JspException 
+	 */
+	@Test(expected = JspException.class)
+	public void doStartTag_exception_writing_cached_content() throws IOException, JspException {
+		// given
+		testSubject.setKey("mykey");
+		testSubject.setCache("ehcachetag");
+		Mockito.doReturn("foo").when(testSubject).getCachedBodyContent("ehcachetag", "mykey");
+		Mockito.doThrow(new IOException()).when(jspWriter).write(Mockito.anyString());
+		ServletRequest servletRequest = Mockito.mock(ServletRequest.class);
+		Mockito.when(pageContext.getRequest()).thenReturn(servletRequest);
+		
+		// when
+		testSubject.doStartTag();
+		
+		// then
+		verifyCleanup();
+	}
+	
+	/**
+	 * Test the behaviour when writing the result to the outputstream causes an IOException.
+	 * @throws IOException 
+	 * @throws JspException 
+	 */
+	@Test(expected = JspException.class)
+	public void doStartTag_exception_writing_cached_content_log_request_uri() throws IOException, JspException {
+		// given
+		testSubject.setKey("mykey");
+		testSubject.setCache("ehcachetag");
+		Mockito.doReturn("foo").when(testSubject).getCachedBodyContent("ehcachetag", "mykey");
+		Mockito.doThrow(new IOException()).when(jspWriter).write(Mockito.anyString());
+		HttpServletRequest servletRequest = Mockito.mock(HttpServletRequest.class);
+		Mockito.when(servletRequest.getRequestURI()).thenReturn("http://example.com/testpage.jsp");
+		Mockito.when(pageContext.getRequest()).thenReturn(servletRequest);
+		
+		// when
+		testSubject.doStartTag();
+		
+		// then
+		verifyCleanup();
+	}
+	
+	/**
+	 * Test the behaviour when the afterRetrieval method throws an exception.
+	 * @throws Exception 
+	 */
+	@Test
+	public void doStartTag_do_after_retrieval_exception() throws Exception {
+		// given
+		testSubject.setKey("mykey");
+		testSubject.setCache("ehcachetag");
+		Mockito.doReturn("foo").when(testSubject).getCachedBodyContent("ehcachetag", "mykey");
+		Mockito.doThrow(new Exception()).when(testSubject).doAfterRetrieval("foo");
+		
+		// when
+		int doStartTagResult = testSubject.doStartTag();
+		
+		// then
+		Assert.assertEquals(1, doStartTagResult);
+		Mockito.verifyNoMoreInteractions(jspWriter);
+		verifyCleanup();
+	}
+	
 	
 	/**
 	 * Test doStartTag where the first modifier throws an exception
@@ -667,6 +754,27 @@ public class CacheTagTest {
 		// Mockito.verifyNoMoreInteractions(pageContext);
 	}
 	
+
+	/**
+	 * Verify that an exception thrown by the doBeforeUpdate call is properly handled.
+	 * @throws Exception 
+	 */
+	@Test(expected = JspException.class)
+	public void testEndTag_exception_on_do_before_update() throws Exception {
+		// given
+		testSubject.setKey("mykey");
+		Mockito.when(bodyContent.getString()).thenReturn("cached content");
+		Mockito.doThrow(new Exception()).when(testSubject).doBeforeUpdate("cached content");
+		
+		// when
+		testSubject.doEndTag();
+		
+		// then
+		Mockito.verify(bodyContent).getString();
+		Mockito.verify(testSubject).doBeforeUpdate("cached content");
+		verifyCleanup();
+		Assert.assertNotNull(testSubject.getKey());
+	}
 
 	/**
 	 * Verify that the cacheTag is ready for use by another thread.
