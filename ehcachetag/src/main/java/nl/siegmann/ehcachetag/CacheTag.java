@@ -286,7 +286,9 @@ public class CacheTag extends BodyTagSupport {
 		try {
 			bodyContentAsString = doBeforeUpdate(bodyContentAsString);
 		} catch (Exception e) {
+			cleanup();
 			LOG.error("modifier threw exception: " + e);
+			throw new JspException(e);
 		}
 
 		// store new bodyContent using cacheKey.
@@ -296,11 +298,11 @@ public class CacheTag extends BodyTagSupport {
 		try {
 			pageContext.getOut().write(bodyContentAsString);
 		} catch (IOException e) {
-			throw new JspException(e);
-		} finally {
 			cleanup();
+			throw new JspException(e);
 		}
 				
+		cleanup();
 		return result;
 	}
 
@@ -311,6 +313,7 @@ public class CacheTag extends BodyTagSupport {
 		key = null;
 		cacheName = null;
 		modifiers = NO_MODIFIERS;
+		// we don't delete the CacheManager as it is assumed to be the same for all tags
 	}
 	
 	/**
