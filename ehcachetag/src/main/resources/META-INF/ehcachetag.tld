@@ -18,14 +18,17 @@
 		<attribute>
 			<name>key</name>
 			<type>java.lang.Object</type>
+			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
 			<name>cache</name>
 			<type>java.lang.String</type>
+			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
 			<name>modifiers</name>
 			<type>java.lang.String</type>
+			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 	</tag>
 </taglib>
