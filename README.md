@@ -4,6 +4,10 @@
 EHCacheTag is a taglib that caches fragments of a jsp page.  
 It uses ehcache for the actual caching.
 
+## Status
+
+* image:https://travis-ci.org/psiegman/ehcachetag.svg?branch=master["Build Status", link="https://travis-ci.org/psiegman/ehcachetag"]
+
 ## Basic example
 
 Here is a basic example fragment.  

@@ -4,6 +4,3 @@ jdk:
   - openjdk6
   - openjdk7
   - oraclejdk7
-
-script:
-  - mvn clean test 
