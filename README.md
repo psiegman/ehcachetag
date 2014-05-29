@@ -7,7 +7,6 @@ It uses ehcache for the actual caching.
 ## Status
 
 * Travis Build Status: [![Build Status](https://travis-ci.org/psiegman/ehcachetag.svg?branch=master)](https://travis-ci.org/psiegman/ehcachetag)
-* Codeship [![Codeship status](https://www.codeship.io/projects/76c329b0-c95f-0131-7d49-4e93f5f9d2ec/status)](https://www.codeship.io)
 
 ## Basic example
 
