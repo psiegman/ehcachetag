@@ -24,6 +24,11 @@ public class EHCacheTagConstants {
 	public static final String CACHE_MANAGER_NAME_PARAM = "ehcachetag.cacheManagerName";
 	
 	/**
+	 * The parameter used to store the CacheManager in the ServletContext
+	 */
+	public static final String CACHE_MANAGER = "ehcachetag.cacheManager";
+
+	/**
 	 * The name of the default cache.
 	 */
 	public static final String DEFAULT_CACHE_NAME = "ehcachetagCache";

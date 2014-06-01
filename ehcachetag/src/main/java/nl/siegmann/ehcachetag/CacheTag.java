@@ -30,8 +30,8 @@ import org.slf4j.LoggerFactory;
  */
 public class CacheTag extends BodyTagSupport {
 
-	static final String NO_SUCH_CACHE = new String();
-	static final String NO_CACHED_VALUE = new String();
+	static final String NO_SUCH_CACHE = "NO_SUCH_CACHE";
+	static final String NO_CACHED_VALUE = "NO_CACHED_VALUE";
 
 	private static final long serialVersionUID = 333106287254149880L;
 	private static final String[] NO_MODIFIERS = new String[0];
@@ -360,36 +360,21 @@ public class CacheTag extends BodyTagSupport {
 	 */
 	CacheManager getCacheManager() {
 		if (cacheManager == null) {
-			String cacheManagerName = getCacheManagerName();
-			if (StringUtils.isNotBlank(cacheManagerName)) {
-				cacheManager = getCacheManager(cacheManagerName);
-				if (cacheManager == null) {
-					LOG.warn("failed to load cache manager " + cacheManagerName + ", loading default cachemanager instead");
-					cacheManager = getDefaultCacheManager();
-				}
+			Object customCacheManager = pageContext.getServletContext().getAttribute(EHCacheTagConstants.CACHE_MANAGER);
+			if (customCacheManager instanceof CacheManager) {
+				this.cacheManager = (CacheManager) customCacheManager;
 			} else {
-				cacheManager = getDefaultCacheManager();
+				if (customCacheManager != null) {
+					LOG.warn("Found an object of unexpected type " + customCacheManager.getClass().getName() +  " as attribute " + EHCacheTagConstants.CACHE_MANAGER + " in the ServletContext instead of expected type " + CacheManager.class.getName() + ". Will now use default CacheManager");
+				}
+				this.cacheManager = getDefaultCacheManager();
 			}
 		}
 		return cacheManager;
 	}
 
-	
-	CacheManager getCacheManager(String cacheManagerName) {
-		return CacheManager.getCacheManager(cacheManagerName);
-	}
-	
 	CacheManager getDefaultCacheManager() {
 		return CacheManager.getInstance();
-	}
-	
-	/**
-	 * Gets the name of the cachemanager from the servletcontext.
-	 * 
-	 * @return the name of the cachemanager from the servletcontext.
-	 */
-	private String getCacheManagerName() {
-		return pageContext.getServletContext().getInitParameter(EHCacheTagConstants.CACHE_MANAGER_NAME_PARAM);
 	}
 	
 	public Object getKey() {
