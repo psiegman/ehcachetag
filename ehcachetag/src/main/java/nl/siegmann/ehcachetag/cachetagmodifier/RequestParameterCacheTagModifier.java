@@ -25,14 +25,8 @@ public class RequestParameterCacheTagModifier extends AbstractCacheTagModifier {
 	 */
 	@Override
 	public void beforeLookup(CacheTag cacheTag, PageContext pageContext) {
-		Object parameterValue = ((HttpServletRequest) pageContext.getRequest()).getParameter(parameter);
-		Object cacheKey;
-		if (parameterValue == null) {
-			cacheKey = null;
-		} else {
-			cacheKey = new CompositeCacheKey(cacheTag.getKey(), parameterValue);
-		}
-		cacheTag.setKey(cacheKey);
+		String requestParameter = ((HttpServletRequest) pageContext.getRequest()).getParameter(parameter);
+		addCacheKeyComponent(requestParameter, cacheTag);
 	}
 
 	public String getParameter() {

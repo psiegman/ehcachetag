@@ -36,4 +36,28 @@ public class CompositeCacheKeyTest {
 		Assert.assertTrue(cacheKey1.hashCode() == cacheKey2.hashCode());
 		Assert.assertTrue(cacheKey1.equals(cacheKey2));
 	}
+
+	@Test
+	public void test_hash_null_element() {
+		// given
+		CompositeCacheKey key = new CompositeCacheKey("hi", null, "bye");
+		
+		// when
+		key.hashCode();
+		
+		// then
+		// just checking that a null value doesn't throw any exceptions
+	}
+
+	@Test
+	public void test_toString_null_value() {
+		// given
+		CompositeCacheKey key = new CompositeCacheKey("hi", null, "bye");
+		
+		// when
+		String toStringValue = key.toString();
+		
+		// then
+		Assert.assertEquals("nl.siegmann.ehcachetag.cachetagmodifier.CompositeCacheKey@62d13a01[keyComponents={hi,<null>,bye}]", toStringValue);
+	}
 }
