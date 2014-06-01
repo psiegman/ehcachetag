@@ -10,42 +10,6 @@ import org.junit.Test;
 
 public class BeanFactoryTest {
 
-	static class TestBean {
-		private String message;
-		private String name;
-		
-		public String getMessage() {
-			return message;
-		}
-		public void setMessage(String message) {
-			this.message = message;
-		}
-		public String getName() {
-			return name;
-		}
-		public void setName(String name) {
-			this.name = name;
-		}
-	}
-
-	static class SecondTestBean {
-		private String color;
-		private String size;
-		
-		public String getColor() {
-			return color;
-		}
-		public void setColor(String color) {
-			this.color = color;
-		}
-		public String getSize() {
-			return size;
-		}
-		public void setSize(String size) {
-			this.size = size;
-		}
-	}
-
 	@Test
 	public void testCreateBeansFromProperties_simple() {
 		// given
@@ -112,6 +76,20 @@ public class BeanFactoryTest {
 		
 		// then
 		Assert.assertEquals("hi", testBean.getMessage());
+		Assert.assertNull(testBean.getName());
+	}
+
+	
+	@Test
+	public void testInteger() {
+		// given
+		String input = TestBean.class.getName() + "?quantity=17";
+		
+		// when
+		TestBean testBean = BeanFactory.createBean(input);
+		
+		// then
+		Assert.assertEquals(17, testBean.getQuantity());
 		Assert.assertNull(testBean.getName());
 	}
 
