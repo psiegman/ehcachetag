@@ -58,6 +58,8 @@ public class CompositeCacheKeyTest {
 		String toStringValue = key.toString();
 		
 		// then
-		Assert.assertEquals("nl.siegmann.ehcachetag.cachetagmodifier.CompositeCacheKey@62d13a01[keyComponents={hi,<null>,bye}]", toStringValue);
+		Assert.assertTrue(toStringValue.contains("null"));
+		Assert.assertTrue(toStringValue.contains("hi"));
+		Assert.assertTrue(toStringValue.contains("bye"));
 	}
 }
