@@ -11,7 +11,7 @@ It uses ehcache for the actual caching.
 ## Basic example
 
 Here is a basic example fragment.  
-The content is stored with the key 'test' in the cache 'ehcachtagCache'.
+The content is stored with the key 'test' in the cache 'ehcachetagCache'.
 
 ```jsp
 <%@ taglib prefix="ect" uri="http://www.siegmann.nl/ehcachetag/taglib" %>
@@ -22,7 +22,7 @@ The content is stored with the key 'test' in the cache 'ehcachtagCache'.
 ```
 
 ## Customizing the cache used
-By default ehcachetag uses a cache named ehcachtagCache.    
+By default ehcachetag uses a cache named ehcachetagCache.    
 This can simply be changed by using the cache attribute on the cachetag
 
 
