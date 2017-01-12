@@ -4,6 +4,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
+import net.sf.ehcache.CacheManager;
 import nl.siegmann.ehcachetag.cachetagmodifier.CacheTagModifierFactory;
 import nl.siegmann.ehcachetag.cachetagmodifier.DefaultCacheTagModifierFactory;
 
@@ -46,6 +47,9 @@ public class EHCacheTagServletContextListener implements ServletContextListener 
 		if (cacheKeyMetaFactory != null) {
 			LOG.info("Initialized EHCacheTag with cacheKeyMetaFactory " + cacheKeyMetaFactory.getClass().getName());
 		}
+		
+		// initialize the cacheManager
+		initCacheManager(servletContext);
 	}
 
 	private CacheTagModifierFactory createCacheKeyMetaFactory(String cacheKeyMetaFactoryClassName, ServletContext servletContext) {
@@ -71,4 +75,19 @@ public class EHCacheTagServletContextListener implements ServletContextListener 
 		}
 	}
 
+	void initCacheManager(ServletContext servletContext) {
+		String cacheManagerName = servletContext.getInitParameter(EHCacheTagConstants.CACHE_MANAGER_NAME_PARAM);
+		if (StringUtils.isNotBlank(cacheManagerName)) {
+			CacheManager cacheManager = getCacheManagerByName(cacheManagerName);
+			if (cacheManager == null) {
+				LOG.error("failed to load cache manager " + cacheManagerName + ", default cacheManager will be used");
+			} else {
+				servletContext.setAttribute(EHCacheTagConstants.CACHE_MANAGER, cacheManager);
+			}
+		}
+	}
+	
+	CacheManager getCacheManagerByName(String cacheManagerName) {
+		return CacheManager.getCacheManager(cacheManagerName);
+	}
 }

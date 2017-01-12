@@ -6,7 +6,10 @@ import javax.servlet.jsp.PageContext;
 import nl.siegmann.ehcachetag.CacheTag;
 
 /**
- * Creates a cachekey by combining the cacheKey from the tag with the Locale from the pageContext request.
+ * Creates a cachekey by combining the cacheKey from the tag with the value of the given request attribute.
+ * 
+ * Potentially dangerous because an attacker can generate a lot of requests
+ * with different attribute values thus ensuring a lot of cache churn.
  * 
  * @author paul
  *
@@ -17,14 +20,8 @@ public class RequestAttributeCacheTagModifier extends AbstractCacheTagModifier {
 	
 	@Override
 	public void beforeLookup(CacheTag cacheTag, PageContext pageContext) {
-		Object attributeValue = ((HttpServletRequest) pageContext.getRequest()).getAttribute(attribute);
-		Object cacheKey;
-		if (attributeValue == null) {
-			cacheKey = null;
-		} else {
-			cacheKey = new CompositeCacheKey(cacheTag.getKey(), attributeValue);
-		}
-		cacheTag.setKey(cacheKey);
+		Object requestAttribute = ((HttpServletRequest) pageContext.getRequest()).getAttribute(attribute);
+		addCacheKeyComponent(requestAttribute, cacheTag);
 	}
 
 	public String getAttribute() {

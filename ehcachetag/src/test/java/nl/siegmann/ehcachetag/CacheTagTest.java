@@ -113,6 +113,31 @@ public class CacheTagTest {
 	}
 
 	/**
+	 * Cache is null, check that we return EVAL_BODY_INCLUDE.
+	 * Also improves the code coverage by added a HttpServletRequest.
+	 * 
+	 * @throws JspException
+	 */
+	@Test
+	public void testDoStartTag_null_cache_httpservletrequest() throws JspException {
+		// given
+		testSubject.setKey("mykey");
+		testSubject.setCache(null);
+		testSubject.setModifiers("hi");
+		HttpServletRequest servletRequest = Mockito.mock(HttpServletRequest.class);
+		Mockito.when(servletRequest.getRequestURI()).thenReturn("http://example.com/testpage.jsp");
+		Mockito.when(pageContext.getRequest()).thenReturn(servletRequest);
+
+		// when
+		int actualResult = testSubject.doStartTag();
+		
+		// then
+		Assert.assertEquals(BodyTagSupport.EVAL_BODY_INCLUDE, actualResult);
+
+		verifyCleanup();
+	}
+
+	/**
 	 * Cache not found.
 	 * 
 	 * @throws JspException
@@ -166,10 +191,9 @@ public class CacheTagTest {
 	@Test
 	public void testDoStartTag_cached_value() throws JspException, IOException {
 		// given
+		ensureCacheContent("mycache", "mykey", "cached_content");
 		testSubject.setKey("mykey");
 		testSubject.setCache("mycache");
-		Mockito.when(cacheManager.getEhcache(Mockito.anyString())).thenReturn(ehcache);
-		Mockito.when(ehcache.get(Mockito.any())).thenReturn(new Element("mykey", "cached_content"));
 		
 		// when
 		int actualResult = testSubject.doStartTag();
@@ -184,6 +208,11 @@ public class CacheTagTest {
 	
 	
 	
+	private void ensureCacheContent(String cacheName, String cacheKey, String cachedContent) {
+		Mockito.when(cacheManager.getEhcache(Mockito.eq(cacheName))).thenReturn(ehcache);
+		Mockito.when(ehcache.get(Mockito.eq((Object) cacheKey))).thenReturn(new Element(cacheKey, cachedContent));
+	}
+
 	@Test
 	public void testDoStartTag_null_cache_key() {
 		// given
@@ -269,9 +298,6 @@ public class CacheTagTest {
 		testSubject.setCache("ehcachetag");
 		Mockito.doReturn("foo").when(testSubject).getCachedBodyContent("ehcachetag", "mykey");
 		Mockito.doThrow(new IOException()).when(jspWriter).write(Mockito.anyString());
-		HttpServletRequest servletRequest = Mockito.mock(HttpServletRequest.class);
-		Mockito.when(servletRequest.getRequestURI()).thenReturn("http://example.com/testpage.jsp");
-		Mockito.when(pageContext.getRequest()).thenReturn(servletRequest);
 		
 		// when
 		testSubject.doStartTag();
@@ -395,64 +421,6 @@ public class CacheTagTest {
 		testSubject.doBeforeLookup();
 		
 		Assert.assertEquals("AB", testSubject.getKey());
-	}
-
-	/**
-	 * Is this test useful ?
-	 * 
-	 * @throws Exception
-	 */
-	@Test
-	public void testDoBeforeLookup_exception() throws Exception {
-		// given
-		CacheTagModifier modifierB = new CacheTagModifier() {
-			
-			@Override
-			public void init(ServletContext servletContext) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			@Override
-			public void destroy() {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			@Override
-			public String beforeUpdate(CacheTag cacheTag, JspContext jspContext,
-					String content) {
-				// TODO Auto-generated method stub
-				return null;
-			}
-			
-			@Override
-			public void beforeLookup(CacheTag cacheTag, JspContext jspContext) {
-				cacheTag.setKey(cacheTag.getKey().toString() + "B");
-				throw new RuntimeException();
-			}
-			
-			@Override
-			public String afterRetrieval(CacheTag cacheTag, JspContext jspContext,
-					String content) {
-				// TODO Auto-generated method stub
-				return null;
-			}
-		};
-		
-		Mockito.when(cacheTagModifierFactory.getCacheTagModifier("modifierB")).thenReturn(modifierB);
-
-		testSubject.setModifiers("modifierB");
-		Mockito.when(pageContext.findAttribute(EHCacheTagConstants.MODIFIER_FACTORY_ATTRIBUTE)).thenReturn(cacheTagModifierFactory);
-
-		// when
-		testSubject.setKey("A");
-		try {
-			testSubject.doBeforeLookup();
-			Assert.fail("Expected RuntimeException");
-		} catch (RuntimeException e) {
-			
-		}
 	}
 
 	
@@ -807,61 +775,41 @@ public class CacheTagTest {
 	@Test
 	public void getCacheManager_defaults() {
 		// given
-		Mockito.when(servletContext.getInitParameter(EHCacheTagConstants.CACHE_MANAGER_NAME_PARAM)).thenReturn(null);
+		Mockito.when(servletContext.getAttribute(EHCacheTagConstants.CACHE_MANAGER)).thenReturn(null);
 
 		// when
 		CacheManager actualCacheManager = testSubject.getCacheManager();
 		
 		// then
 		Mockito.verify(testSubject).getDefaultCacheManager();
-		Mockito.verify(testSubject, Mockito.never()).getCacheManager(Mockito.anyString());
 
 		Assert.assertTrue(actualCacheManager == cacheManager);
 	}
 
 	@Test
-	public void getCacheManager_non_existing_cacheManager() {
+	public void getCacheManager_invalid_cacheManager_in_servletcontext() {
 		// given
-		Mockito.when(servletContext.getInitParameter(EHCacheTagConstants.CACHE_MANAGER_NAME_PARAM)).thenReturn("foo");
-		Mockito.when(testSubject.getCacheManager("foo")).thenReturn(null);
+		Mockito.when(servletContext.getAttribute(EHCacheTagConstants.CACHE_MANAGER)).thenReturn("Hello");
 		
 		// when
 		CacheManager actualCacheManager = testSubject.getCacheManager();
 		
 		// then
 		Mockito.verify(testSubject).getDefaultCacheManager();
-		Mockito.verify(testSubject).getCacheManager("foo");
 
 		Assert.assertTrue(actualCacheManager == cacheManager);
 	}
 
 	@Test
-	public void getCacheManager_blank_string_cacheManager() {
+	public void getCacheManager_customized_cacheManager() {
 		// given
-		Mockito.when(servletContext.getInitParameter(EHCacheTagConstants.CACHE_MANAGER_NAME_PARAM)).thenReturn(" ");
+		Mockito.when(servletContext.getAttribute(EHCacheTagConstants.CACHE_MANAGER)).thenReturn(customCacheManager);
 		
 		// when
 		CacheManager actualCacheManager = testSubject.getCacheManager();
 		
 		// then
-		Mockito.verify(testSubject).getDefaultCacheManager();
-		Mockito.verify(testSubject, Mockito.never()).getCacheManager(Mockito.anyString());
-
-		Assert.assertTrue(actualCacheManager == cacheManager);
-	}
-	
-	@Test
-	public void getCacheManager_custom_cacheManager() {
-		// given
-		Mockito.when(servletContext.getInitParameter(EHCacheTagConstants.CACHE_MANAGER_NAME_PARAM)).thenReturn("custom");
-		Mockito.when(testSubject.getCacheManager("custom")).thenReturn(customCacheManager);
-		
-		// when
-		CacheManager actualCacheManager = testSubject.getCacheManager();
-		
-		// then
-		Mockito.verify(testSubject).getCacheManager("custom");
-		Mockito.verify(testSubject, Mockito.never()).getDefaultCacheManager();
+		Mockito.verify(testSubject, Mockito.times(0)).getDefaultCacheManager();
 
 		Assert.assertTrue(actualCacheManager == customCacheManager);
 	}

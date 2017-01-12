@@ -18,7 +18,6 @@ public class LocaleCacheTagModifier extends AbstractCacheTagModifier {
 	@Override
 	public void beforeLookup(CacheTag cacheTag, PageContext pageContext) {
 		Locale locale = ((HttpServletRequest) pageContext.getRequest()).getLocale();
-		Object cacheKey = new CompositeCacheKey(cacheTag.getKey(), locale);
-		cacheTag.setKey(cacheKey);
+		addCacheKeyComponent(locale, cacheTag);
 	}
 }

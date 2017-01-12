@@ -15,8 +15,7 @@ public class UrlCacheTagModifier extends AbstractCacheTagModifier {
 
 	@Override
 	public void beforeLookup(CacheTag cacheTag, PageContext pageContext) {
-		String requestUri = ((HttpServletRequest) pageContext.getRequest()).getRequestURI();
-		Object cacheKey = new CompositeCacheKey(cacheTag.getKey(), requestUri);
-		cacheTag.setKey(cacheKey);
+		String requestURI = ((HttpServletRequest) pageContext.getRequest()).getRequestURI();
+		addCacheKeyComponent(requestURI, cacheTag);
 	}
 }

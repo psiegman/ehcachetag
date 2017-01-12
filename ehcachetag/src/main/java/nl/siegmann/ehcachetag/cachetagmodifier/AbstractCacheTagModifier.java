@@ -20,6 +20,25 @@ public abstract class AbstractCacheTagModifier implements CacheTagModifier {
 		}
 	}
 
+	/**
+	 * Adds the extraComponent as an extra element to the cacheKey.
+	 * 
+	 * If the current key is null and the extraComponent is null then the cacheKey is left as null.
+	 * 
+	 * @param extraComponent
+	 * @param cacheTag
+	 */
+	protected void addCacheKeyComponent(Object extraComponent, CacheTag cacheTag) {
+		Object currentCacheKey = cacheTag.getKey();
+		
+		if (currentCacheKey == null && extraComponent == null) {
+			return;
+		}
+
+		CompositeCacheKey compositeCacheKey = new CompositeCacheKey(currentCacheKey, extraComponent);
+		cacheTag.setKey(compositeCacheKey);
+	}
+
 	@Override
 	public String beforeUpdate(CacheTag cacheTag,
 			JspContext jspContext, String content) {

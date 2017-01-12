@@ -108,10 +108,11 @@ Example.jsp:
 Modifiers are by default managed by the DefaultCacheTagModifierFactory.
 This ModifierFactory is a light-weight bean factory that enables you to run the ehcache tag system without Spring or any other bean factory.
 
-However, if you do want your cachetagmodifiers managed by Spring or another bean factory then this is possible as follows:
+However, there are 2 other options available:
+- Use the SpringCacheTagModifierFactory from the ehcachetag-spring project
+- Implement your own CacheTagModifierFactory.
 
-1. Implement your own CacheTagModifierFactory.
-2. Configure this in the web.xml like this:  
+Configure your non-default CacheTagModifierFactory in the web.xml like this:  
 
 ```xml
 <context-param>
@@ -124,6 +125,7 @@ However, if you do want your cachetagmodifiers managed by Spring or another bean
 
 ## Customizing the default cache behaviour
 If you add a Modifier with the name 'default' to the DefaultCacheTagModifierFactory config, then it will be used by default for every cache tag use.
+
 ## Customizing the cache manager
 When you don't want to use the default cache manager that CacheManager.getInstance() provides, you can add a parameter in web.xml:
 

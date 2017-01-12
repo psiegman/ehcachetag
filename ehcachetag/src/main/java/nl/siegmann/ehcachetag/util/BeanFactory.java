@@ -1,15 +1,18 @@
 package nl.siegmann.ehcachetag.util;
 
+import java.beans.PropertyDescriptor;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.commons.beanutils.BeanUtilsBean;
+import org.apache.commons.beanutils.ConvertUtilsBean;
+import org.apache.commons.beanutils.PropertyUtilsBean;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +33,7 @@ public class BeanFactory {
 	public static final String QUERY_STRING_CHARACTER_ENCODING = "UTF-8";
 	
 	private static final Logger LOG = LoggerFactory.getLogger(BeanFactory.class);
+	private static final PropertyUtilsBean propertyUtilsBean = new PropertyUtilsBean();
 
 	public static Map<String, Object> createBeansFromProperties(String propertiesString) {
 		Map<String, Object> result = new HashMap<String, Object>();
@@ -79,11 +83,11 @@ public class BeanFactory {
 	/**
 	 * Sets all the bean properties, returning null if anything goes wrong.
 	 * 
-	 * @param sourceBean
+	 * @param bean
 	 * @param queryString
-	 * @return the given sourceBean with all the bean properties set, null if anything went wrong.
+	 * @return the given bean with all the bean properties set, null if anything went wrong.
 	 */
-	private static <T> T initializeBean(T sourceBean,
+	private static <T> T initializeBean(T bean,
 			String queryString) {
 		
 		T result = null;
@@ -91,12 +95,10 @@ public class BeanFactory {
 		try {
 			splitQuery = parseQueryString(queryString);
 			for (Map.Entry<String, String> keyValue: splitQuery.entrySet()) {
-				setProperty(sourceBean, keyValue.getKey(), keyValue.getValue());
+				setProperty(bean, keyValue.getKey(), keyValue.getValue());
 			}
-			result = sourceBean;
+			result = bean;
 		} catch (UnsupportedEncodingException e) {
-			LOG.error(e.toString());
-		} catch (NoSuchMethodException e) {
 			LOG.error(e.toString());
 		} catch (SecurityException e) {
 			LOG.error(e.toString());
@@ -106,19 +108,26 @@ public class BeanFactory {
 			LOG.error(e.toString());
 		} catch (InvocationTargetException e) {
 			LOG.error(e.toString());
+		} catch (NoSuchMethodException e) {
+			LOG.error(e.toString());
 		}
 		return result;
 	}
+	
+	private static void setProperty(Object bean, String propertyName, String propertyValue) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
 
-	private static void setProperty(Object bean, String property, String value) throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		Method setterMethod = getSetterMethod(bean, property);
-		setterMethod.invoke(bean, value);
-	}
-
-	private static Method getSetterMethod(Object bean, String propertyName) throws NoSuchMethodException, SecurityException {
-		String methodName = "set" + Character.toUpperCase(propertyName.charAt(0)) + propertyName.substring(1);
-		Method result = bean.getClass().getMethod(methodName, String.class);
-		return result;
+		// apache commons BeanUtilsBean silently ignores missing properties, so we do the work ourselves
+		PropertyDescriptor propertyDescriptor = propertyUtilsBean.getPropertyDescriptor(bean, propertyName);
+		
+		if (propertyDescriptor == null) {
+			throw new IllegalArgumentException("Property " + propertyName + " not found on class " + bean.getClass().getName());
+		}
+		ConvertUtilsBean convertUtilsBean = new ConvertUtilsBean();
+		convertUtilsBean.register(true, true, 0);
+		
+		Object value = convertUtilsBean.convert(propertyValue, propertyDescriptor.getPropertyType());
+		
+		propertyUtilsBean.setProperty(bean, propertyName, value);
 	}
 
 	@SuppressWarnings("unchecked")
